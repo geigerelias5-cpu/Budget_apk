@@ -203,6 +203,23 @@ final class Bridge {
         });
     }
 
+    /** Öffnet die Dateiauswahl für eine CSV-Datei mit Kontoumsätzen; Ergebnis über window.csvResult(text). */
+    @JavascriptInterface
+    public void importCsv() {
+        activity.runOnUiThread(() -> {
+            Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            i.addCategory(Intent.CATEGORY_OPENABLE);
+            i.setType("*/*");
+            i.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"text/csv", "text/comma-separated-values",
+                    "text/plain", "application/csv", "application/vnd.ms-excel", "application/octet-stream"});
+            try {
+                activity.startActivityForResult(i, MainActivity.REQ_CSV);
+            } catch (Exception e) {
+                // keine Dateiauswahl verfügbar
+            }
+        });
+    }
+
     @JavascriptInterface
     public void close() {
         activity.runOnUiThread(() -> {

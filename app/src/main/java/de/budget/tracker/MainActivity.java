@@ -8,6 +8,7 @@ import android.webkit.WebView;
 public class MainActivity extends Activity {
     static final int REQ_NOTIFY = 7;
     static final int REQ_IMPORT = 8;
+    static final int REQ_CSV = 9;
     private WebView web;
     private boolean firstResume = true;
 
@@ -24,7 +25,8 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode != REQ_IMPORT || resultCode != RESULT_OK || data == null || data.getData() == null) return;
+        if ((requestCode != REQ_IMPORT && requestCode != REQ_CSV) || resultCode != RESULT_OK
+                || data == null || data.getData() == null) return;
         String text = "";
         try (java.io.InputStream in = getContentResolver().openInputStream(data.getData())) {
             if (in != null) {
@@ -32,11 +34,28 @@ public class MainActivity extends Activity {
                 byte[] b = new byte[8192];
                 int n;
                 while ((n = in.read(b)) > 0 && buf.size() < 20_000_000) buf.write(b, 0, n);
-                text = buf.toString("UTF-8");
+                text = decode(buf.toByteArray());
             }
         } catch (Exception ignored) {
         }
-        web.evaluateJavascript("window.importResult && importResult(" + org.json.JSONObject.quote(text) + ")", null);
+        String fn = requestCode == REQ_CSV ? "csvResult" : "importResult";
+        web.evaluateJavascript("window." + fn + " && " + fn + "(" + org.json.JSONObject.quote(text) + ")", null);
+    }
+
+    /** Text als UTF-8 lesen; Bank-CSVs sind oft Windows-1252 (Umlaute), dann darauf ausweichen. */
+    private static String decode(byte[] bytes) {
+        try {
+            return java.nio.charset.StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+                    .decode(java.nio.ByteBuffer.wrap(bytes)).toString();
+        } catch (Exception e) {
+            try {
+                return new String(bytes, "windows-1252");
+            } catch (Exception e2) {
+                return new String(bytes, java.nio.charset.StandardCharsets.ISO_8859_1);
+            }
+        }
     }
 
     @Override
