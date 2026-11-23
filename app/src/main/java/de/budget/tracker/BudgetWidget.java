@@ -82,6 +82,9 @@ public class BudgetWidget extends AppWidgetProvider {
         }
         if (type == RING) {
             v.setTextViewText(R.id.w_month, left != null && left < 0 ? "über Budget" : "übrig");
+            // Glatte Beträge (ohne Cent) sind kürzer und dürfen größer sein
+            boolean whole = left != null && Math.round(Math.abs(left) * 100) % 100 == 0;
+            v.setTextViewTextSize(R.id.w_left, android.util.TypedValue.COMPLEX_UNIT_SP, whole ? 21f : 16f);
             v.setImageViewBitmap(R.id.w_ring, ring(mo));
         }
 
