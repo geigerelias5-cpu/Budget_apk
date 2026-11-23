@@ -4,6 +4,9 @@ on:
   push:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,3 +32,12 @@ jobs:
         with:
           name: Budget-APK
           path: Budget.apk
+
+      - name: Als Release veröffentlichen (direkter Download-Link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "build-${{ github.run_number }}" Budget.apk \
+            --title "Budget App (Build ${{ github.run_number }})" \
+            --notes "Auf dem Handy Budget.apk antippen und installieren." \
+            --latest
