@@ -1,10 +1,12 @@
 package de.budget.tracker;
 
 import android.app.Activity;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.webkit.WebView;
 
 public class MainActivity extends Activity {
+    static final int REQ_NOTIFY = 7;
     private WebView web;
     private boolean firstResume = true;
 
@@ -17,8 +19,18 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != REQ_NOTIFY) return;
+        boolean ok = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+        Store.setLockEnabled(this, ok);
+        web.evaluateJavascript("window.lockResult && lockResult(" + ok + ")", null);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+        Store.refreshAll(this);
         // Daten neu laden, falls über das Widget etwas eingetragen wurde
         if (!firstResume) web.evaluateJavascript("window.nativeResume && nativeResume()", null);
         firstResume = false;

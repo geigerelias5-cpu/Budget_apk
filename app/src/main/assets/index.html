@@ -21,7 +21,7 @@ html,body{margin:0;height:100%;background:var(--scr);color:var(--ink);font:16px/
 /* Widget-Auswahl */
 .wsh{position:fixed;inset:0;z-index:20;pointer-events:none}
 .wsh .bg{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .35s}
-.wsh .pn{position:absolute;left:10px;right:10px;bottom:10px;background:var(--card);border:1px solid var(--line);border-radius:30px;padding:20px 18px 16px;transform:translateY(110%);transition:transform .45s cubic-bezier(.2,.9,.2,1)}
+.wsh .pn{position:absolute;left:10px;right:10px;bottom:10px;max-height:calc(100% - 40px);overflow-y:auto;scrollbar-width:none;background:var(--card);border:1px solid var(--line);border-radius:30px;padding:20px 18px 16px;transform:translateY(110%);transition:transform .45s cubic-bezier(.2,.9,.2,1)}
 .wsh.on{pointer-events:auto}.wsh.on .bg{opacity:.45}.wsh.on .pn{transform:none}
 .wsh h2{font-size:22px;margin:0 0 4px}.wsh p{color:var(--mut);font-size:14px;margin:0 0 14px}
 .opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--scr);color:var(--ink);border-radius:22px;padding:14px;margin-bottom:10px;font:inherit}
@@ -35,6 +35,13 @@ html,body{margin:0;height:100%;background:var(--scr);color:var(--ink);font:16px/
 .mini .p{width:26px;height:26px;border-radius:50%;background:var(--red);display:grid;place-items:center;color:#fff;font-size:17px;line-height:1}
 .mini .g{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:7px}
 .mini .g i{height:16px;border-radius:99px;background:#141414;border:1px solid #ffffff1c}
+.sh{font-size:13px;color:var(--mut);font-weight:500;margin:8px 4px 8px}
+.row2{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);background:var(--scr);color:var(--ink);border-radius:22px;padding:14px 16px;margin-bottom:10px;font:inherit}
+.row2 div{flex:1}.row2 b{display:block;font-size:15px}.row2 small{color:var(--mut);font-size:13px;line-height:1.35;display:block}
+.sw{flex:none;width:52px;height:32px;border-radius:99px;background:var(--line);position:relative;transition:background .25s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:transform .3s cubic-bezier(.2,.9,.2,1)}
+.sw.on{background:var(--red)}.sw.on::after{transform:translateX(20px)}
+.chev{flex:none;color:var(--mut)}
 .wsh .cl{width:100%;min-height:46px;border:0;background:none;color:var(--mut);font:500 15px Hanken,sans-serif}
 .mon{color:var(--mut);font-size:14px;margin:2px 0 0}
 .ring{position:relative;width:min(68vw,270px);aspect-ratio:1;margin:18px auto 10px}
@@ -126,6 +133,8 @@ button:focus{outline:none}
   <div class="field"><input id="eB" inputmode="decimal" aria-label="Monatsbudget in Euro"><span>€</span></div>
   <div class="err" id="eE"></div>
   <button class="pri" id="eSave">Speichern</button>
+  <label>Sperrbildschirm</label>
+  <button class="row2" data-lock><div><b>Budget auf dem Sperrbildschirm</b><small>Restbetrag, Balken und „+ Ausgabe“</small></div><span class="sw" aria-hidden="true"></span></button>
   <label>Daten</label>
   <p>Der Monat beginnt automatisch am 1. neu. Alte Einträge bleiben gespeichert.</p>
   <button class="sec warn" id="eReset">Einträge dieses Monats löschen</button>
@@ -135,8 +144,8 @@ button:focus{outline:none}
 <div class="wsh" id="wsh" aria-hidden="true">
   <div class="bg" id="wshBg"></div>
   <div class="pn" role="dialog" aria-label="Widget hinzufügen">
-    <h2>Widget hinzufügen</h2>
-    <p>Wähle eine Größe. Danach fragt dein Handy, ob es auf den Startbildschirm soll.</p>
+    <h2>Widget &amp; Sperrbildschirm</h2>
+    <p>Wähle eine Größe. Danach fragt dein Handy, ob das Widget auf den Startbildschirm soll.</p>
     <button class="opt" data-size="large">
       <div class="t"><b>Standard<i class="tag">Empfohlen</i></b><span>4×2</span></div>
       <div class="mini"><div class="r"><div><div class="l">übrig diesen Monat</div><div class="v" id="pv1">–</div></div><div class="p">+</div></div><div class="g"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
@@ -147,7 +156,10 @@ button:focus{outline:none}
       <div class="mini"><div class="r"><div><div class="l">übrig diesen Monat</div><div class="v" id="pv2">–</div></div><div class="p">+</div></div></div>
       <small>Nur Restbetrag und Plus-Knopf, schmal und unauffällig</small>
     </button>
-    <button class="cl" id="wshX">Abbrechen</button>
+    <div class="sh">Sperrbildschirm</div>
+    <button class="row2" data-lock><div><b>Budget auf dem Sperrbildschirm</b><small>Restbetrag, Balken und „+ Ausgabe“, eintragen ohne Entsperren</small></div><span class="sw" aria-hidden="true"></span></button>
+    <button class="row2" id="tileBtn"><div><b>Schnellzugriff-Kachel</b><small>„Ausgabe“ in den Schnelleinstellungen, auch bei gesperrtem Handy</small></div><svg class="chev" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4l6 6-6 6"/></svg></button>
+    <button class="cl" id="wshX">Schließen</button>
   </div>
 </div>
 <button class="fab hide" id="fab" aria-label="Ausgabe eintragen"><svg width="24" height="24" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg></button>
@@ -173,8 +185,19 @@ $('toSet').onclick=()=>show('E');
 const wsh=$('wsh');
 function openW(){const l=eur0(S.budget-spent());$('pv1').textContent=$('pv2').textContent=l;wsh.classList.add('on');wsh.setAttribute('aria-hidden','false')}
 function closeW(){wsh.classList.remove('on');wsh.setAttribute('aria-hidden','true')}
-$('toWid').onclick=openW;$('wshBg').onclick=closeW;$('wshX').onclick=closeW;
-wsh.addEventListener('click',e=>{const o=e.target.closest('.opt');if(!o)return;
+$('toWid').onclick=()=>{lockUI();openW()};
+/* Sperrbildschirm */
+function lockUI(){let on=false;try{on=NATIVE&&Android.lockEnabled()}catch(e){}for(const el of document.querySelectorAll('.sw'))el.classList.toggle('on',!!on)}
+document.addEventListener('click',e=>{if(!e.target.closest('[data-lock]'))return;
+ if(!NATIVE)return toast('Funktioniert nur in der App auf dem Handy');
+ const want=!Android.lockEnabled(),r=Android.setLock(want);lockUI();
+ if(r=='on')toast('Jetzt auf dem Sperrbildschirm sichtbar');
+ else if(r=='off')toast('Sperrbildschirm-Anzeige aus');
+ else if(r=='settings')toast('Erlaube Benachrichtigungen für Budget, dann nochmal einschalten')});
+window.lockResult=ok=>{lockUI();toast(ok?'Jetzt auf dem Sperrbildschirm sichtbar':'Ohne Benachrichtigungen geht es leider nicht')};
+$('tileBtn').onclick=()=>{let ok=false;try{ok=NATIVE&&Android.addTile()}catch(e){}
+ closeW();if(!ok)setTimeout(()=>toast('Schnelleinstellungen runterziehen → Stift → „Ausgabe“ hinzufügen'),300)};$('wshBg').onclick=closeW;$('wshX').onclick=closeW;
+wsh.addEventListener('click',e=>{const o=e.target.closest('.opt[data-size]');if(!o)return;
  let ok=false;try{ok=NATIVE&&Android.pinWidget(o.dataset.size)}catch(err){}
  closeW();
  setTimeout(()=>toast(ok?'Bestätige jetzt „Hinzufügen“':'Geht hier nicht: lange auf den Startbildschirm drücken → Widgets → Budget'),300)});
@@ -241,14 +264,14 @@ function render(o={}){
 }
 
 /* Zurück in die App (z. B. nach Eintrag über das Widget) */
-window.nativeResume=()=>{const before=new Set(S.entries.map(e=>e.id));S=loadState();
+window.nativeResume=()=>{lockUI();const before=new Set(S.entries.map(e=>e.id));S=loadState();
  const added=S.entries.filter(e=>!before.has(e.id)).sort((a,b)=>b.ts-a.ts)[0];
  if(!S.budget){show('S');return}
  if(view=='S')show('M');
  if(view=='M')fresh=true;
  render(added?{newId:added.id}:{})};
 
-show(S.budget?'M':'S');render();
+lockUI();show(S.budget?'M':'S');render();
 }
 </script>
 </body>

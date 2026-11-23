@@ -22,6 +22,7 @@ public class BudgetWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
         for (int id : ids) manager.updateAppWidget(id, build(context, false));
+        LockNotify.update(context);
     }
 
     /** Aktualisiert alle Widgets beider Größen. */

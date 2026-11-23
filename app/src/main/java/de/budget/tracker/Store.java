@@ -30,12 +30,42 @@ final class Store {
     }
 
     static void write(Context c, String json) {
-        prefs(c).edit().putString(KEY, json).apply();
+        prefs(c).edit().putString(KEY, json).commit();
+        refreshAll(c);
+    }
+
+    /** Widgets, Sperrbildschirm-Anzeige und Kachel auf den neuesten Stand bringen. */
+    static void refreshAll(Context c) {
         BudgetWidget.updateAll(c);
+        LockNotify.update(c);
+        AddTile.refresh(c);
+    }
+
+    static boolean askedNotify(Context c) {
+        return prefs(c).getBoolean("askedNotify", false);
+    }
+
+    static void setAskedNotify(Context c) {
+        prefs(c).edit().putBoolean("askedNotify", true).apply();
+    }
+
+    static boolean lockEnabled(Context c) {
+        return prefs(c).getBoolean("lock", false);
+    }
+
+    static void setLockEnabled(Context c, boolean on) {
+        prefs(c).edit().putBoolean("lock", on).commit();
+        LockNotify.update(c);
     }
 
     /** Budget minus Ausgaben im aktuellen Monat. Gibt null zurück, wenn noch kein Budget gesetzt ist. */
     static Double remaining(Context c) {
+        double[] s = summary(c);
+        return s == null ? null : s[0] - s[1];
+    }
+
+    /** {Budget, ausgegeben in diesem Monat} oder null, wenn kein Budget gesetzt ist. */
+    static double[] summary(Context c) {
         try {
             JSONObject o = new JSONObject(read(c));
             double budget = o.optDouble("budget", 0);
@@ -54,7 +84,7 @@ final class Store {
                     }
                 }
             }
-            return budget - spent;
+            return new double[]{budget, spent};
         } catch (Exception ex) {
             return null;
         }
