@@ -137,7 +137,7 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .w21{margin:0;width:100%;background:#000;color:#f2f2f2;border:1px solid #ffffff17;border-radius:22px;padding:9px 9px 12px 14px;display:block;box-shadow:0 16px 30px -16px #000}
 .w21 .tr{margin-right:5px}
 .w21 small{display:block;font-size:11px;color:#8a8a8a;line-height:1.2}
-.w21 b{display:block;font:900 19px/1.15 Doto,monospace;margin:2px 0 0;white-space:nowrap;transition:color .3s}
+.w21 b{display:block;font:900 17px/1.15 Doto,monospace;margin:2px 0 0;white-space:nowrap;transition:color .3s}
 .w21r{display:flex;align-items:center;gap:6px;margin-bottom:8px}
 .w21o{flex:1;border:0;background:none;color:inherit;padding:0;text-align:left;font:inherit;cursor:pointer;min-height:40px}
 .w21p{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--red);display:grid;place-items:center;cursor:pointer}
@@ -288,6 +288,9 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .tip{position:absolute;top:0;translate:-50% 0;background:#000;color:#f2f2f2;border:1px solid #ffffff1f;border-radius:12px;padding:6px 10px;font-size:12px;white-space:nowrap;pointer-events:none;z-index:3;box-shadow:0 10px 24px -10px #000a}
 .tip b{font:900 15px Doto,monospace;display:block}
 .tip .o{color:#ff6b72}
+.fab{position:absolute;right:16px;bottom:80px;height:52px;padding:0 20px 0 16px;border-radius:99px;border:0;background:var(--red);color:#fff;display:flex;align-items:center;gap:8px;font:700 15px "Hanken Grotesk",system-ui,sans-serif;box-shadow:0 14px 30px -10px #d7192199;z-index:5;cursor:pointer;transition:transform .25s,opacity .3s}
+.fab.hide{transform:scale(.6);opacity:0;pointer-events:none}
+.hist{margin-bottom:70px}
 [hidden]{display:none!important}
 footer{text-align:center;color:var(--mut);font-size:13px;padding:0 16px 32px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -301,9 +304,6 @@ body{-webkit-tap-highlight-color:transparent;user-select:none}
 .page{padding-top:12px}
 input,textarea{user-select:text}
 button:focus{outline:none}
-.fab{position:absolute;right:18px;bottom:82px;width:58px;height:58px;border-radius:50%;border:0;background:var(--red);color:#fff;display:grid;place-items:center;box-shadow:0 14px 30px -10px #d7192199;z-index:5;transition:transform .25s,opacity .3s;cursor:pointer}
-.fab.hide{transform:scale(0);opacity:0;pointer-events:none}
-.hist{margin-bottom:70px}
 </style>
 </head>
 <body>
@@ -359,7 +359,7 @@ button:focus{outline:none}
         <button class="sec warn" id="eAll">Alles zurücksetzen</button>
       </div>
 
-      <button class="fab hide" id="fab" aria-label="Ausgabe eintragen"><svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="fab" id="fab" aria-label="Ausgabe eintragen"><svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span>Ausgabe</span></button>
       <div class="qs" id="qs" aria-hidden="true">
         <div class="dim" id="qsDim"></div>
         <div class="sh" role="dialog" aria-label="Ausgabe eintragen">
