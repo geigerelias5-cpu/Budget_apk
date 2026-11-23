@@ -16,8 +16,16 @@ final class Store {
     private static final String KEY = "state";
 
     static final String[] CAT_IDS = {"essen", "einkauf", "transport", "freizeit", "wohnen", "sonst"};
-    static final String[] CAT_NAMES = {"Essen", "Einkauf", "Transport", "Freizeit", "Wohnen", "Sonstiges"};
+    static final String[] CAT_NAMES = {"Essen", "Einkauf", "Sprit", "Freizeit", "Versicherung", "Sonstiges"};
     static final int[] CAT_COLORS = {0xFFD71921, 0xFFF2F2F2, 0xFF8A8A8A, 0xFFF08C90, 0xFF6B6B6B, 0xFFC4C4BF};
+    /** Farbe der eigenen Kategorie „Dauerbeträge“ (Index 6 in byCat). */
+    static final int FIX_COLOR = 0xFF8C1016;
+
+    /** Zahlen des laufenden Monats. byCat: 6 Kategorien + Dauerbeträge. */
+    static final class Month {
+        double budget, spent;
+        final double[] byCat = new double[7];
+    }
 
     private Store() {}
 
@@ -66,28 +74,62 @@ final class Store {
 
     /** {Budget, ausgegeben in diesem Monat} oder null, wenn kein Budget gesetzt ist. */
     static double[] summary(Context c) {
+        Month m = month(c);
+        return m == null ? null : new double[]{m.budget, m.spent};
+    }
+
+    /** Laufender Monat inkl. Dauerbeträgen, die die App noch nicht als Eintrag angelegt hat. */
+    static Month month(Context c) {
         try {
             JSONObject o = new JSONObject(read(c));
             double budget = o.optDouble("budget", 0);
             if (budget <= 0) return null;
-            JSONArray arr = o.optJSONArray("entries");
+            Month m = new Month();
+            m.budget = budget;
             Calendar now = Calendar.getInstance();
+            String ym = String.format(Locale.ROOT, "%04d-%02d", now.get(Calendar.YEAR), now.get(Calendar.MONTH) + 1);
             Calendar d = Calendar.getInstance();
-            double spent = 0;
+            java.util.HashSet<String> fixedSeen = new java.util.HashSet<>();
+            JSONArray arr = o.optJSONArray("entries");
             if (arr != null) {
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject e = arr.getJSONObject(i);
                     d.setTimeInMillis(e.optLong("ts"));
-                    if (d.get(Calendar.YEAR) == now.get(Calendar.YEAR)
-                            && d.get(Calendar.MONTH) == now.get(Calendar.MONTH)) {
-                        spent += e.optDouble("amt", 0);
-                    }
+                    if (d.get(Calendar.YEAR) != now.get(Calendar.YEAR)
+                            || d.get(Calendar.MONTH) != now.get(Calendar.MONTH)) continue;
+                    double amt = e.optDouble("amt", 0);
+                    m.spent += amt;
+                    String fixedId = e.optString("fixed", "");
+                    if (!fixedId.isEmpty()) fixedSeen.add(fixedId);
+                    m.byCat[catIndex(fixedId.isEmpty() ? e.optString("cat") : "fix")] += amt;
                 }
             }
-            return new double[]{budget, spent};
+            JSONArray fixed = o.optJSONArray("fixed");
+            if (fixed != null) {
+                for (int i = 0; i < fixed.length(); i++) {
+                    JSONObject f = fixed.getJSONObject(i);
+                    String id = f.optString("id");
+                    if (fixedSeen.contains(id)) continue;
+                    if (f.optString("from", ym).compareTo(ym) > 0) continue;
+                    JSONArray skip = f.optJSONArray("skip");
+                    boolean skipped = false;
+                    if (skip != null) for (int j = 0; j < skip.length(); j++) if (ym.equals(skip.optString(j))) skipped = true;
+                    if (skipped) continue;
+                    double amt = f.optDouble("amt", 0);
+                    m.spent += amt;
+                    m.byCat[6] += amt;
+                }
+            }
+            return m;
         } catch (Exception ex) {
             return null;
         }
+    }
+
+    static int catIndex(String id) {
+        if ("fix".equals(id)) return 6;
+        for (int i = 0; i < CAT_IDS.length; i++) if (CAT_IDS[i].equals(id)) return i;
+        return 5;
     }
 
     static String euro(double v) {

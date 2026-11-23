@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 2×2: Ring nach Kategorien, Restbetrag, Plus -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/w_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_bg"
+    android:orientation="vertical"
+    android:padding="9dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/w_month"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="5dp"
+            android:text="Budget"
+            android:textColor="#8A8A8A"
+            android:textSize="11sp" />
+
+        <ImageView
+            android:id="@+id/w_add"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/add_bg"
+            android:contentDescription="Ausgabe eintragen"
+            android:scaleType="center"
+            android:src="@drawable/ic_plus_small" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/w_open"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ImageView
+            android:id="@+id/w_ring"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="Ausgaben nach Kategorie"
+            android:scaleType="fitCenter" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/w_left"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-condensed"
+                android:maxLines="1"
+                android:text="–"
+                android:textColor="#F2F2F2"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="übrig"
+                android:textColor="#8A8A8A"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </FrameLayout>
+</LinearLayout>

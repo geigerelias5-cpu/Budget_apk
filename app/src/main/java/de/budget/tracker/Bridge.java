@@ -64,14 +64,17 @@ final class Bridge {
 
     /**
      * Bittet den Launcher, ein Widget auf den Startbildschirm zu legen.
-     * size: "large" (4×2) oder "small" (4×1). Gibt false zurück, wenn der Launcher das nicht kann.
+     * size: "2x1", "2x2", "4x1" oder "4x2". Gibt false zurück, wenn der Launcher das nicht kann.
      */
     @JavascriptInterface
     public boolean pinWidget(String size) {
         try {
             AppWidgetManager m = AppWidgetManager.getInstance(activity);
             if (!m.isRequestPinAppWidgetSupported()) return false;
-            Class<?> cls = "small".equals(size) ? BudgetWidgetSmall.class : BudgetWidget.class;
+            Class<?> cls = "2x1".equals(size) ? BudgetWidget21.class
+                    : "2x2".equals(size) ? BudgetWidget22.class
+                    : ("4x1".equals(size) || "small".equals(size)) ? BudgetWidgetSmall.class
+                    : BudgetWidget.class;
             return m.requestPinAppWidget(new ComponentName(activity, cls), null, null);
         } catch (Exception e) {
             return false;

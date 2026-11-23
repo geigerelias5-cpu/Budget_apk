@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-/** Dauerhafte Anzeige auf dem Sperrbildschirm: Restbetrag, Balken und „+ Ausgabe“. */
+/** „Budget als Nachricht“: dauerhafte Benachrichtigung mit Restbetrag, Balken und „+ Ausgabe“ (auch auf dem Sperrbildschirm). */
 final class LockNotify {
     private static final String CHANNEL = "lock";
     private static final int ID = 1;
@@ -29,7 +29,7 @@ final class LockNotify {
             return;
         }
 
-        NotificationChannel ch = new NotificationChannel(CHANNEL, "Budget auf dem Sperrbildschirm",
+        NotificationChannel ch = new NotificationChannel(CHANNEL, "Budget als Nachricht",
                 NotificationManager.IMPORTANCE_LOW);
         ch.setDescription("Zeigt den Restbetrag und einen Knopf zum Eintragen");
         ch.setShowBadge(false);

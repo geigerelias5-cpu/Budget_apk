@@ -2,6 +2,8 @@
 <resources>
     <string name="app_name">Budget</string>
     <string name="widget_desc">Ausgabe schnell eintragen und sehen, was vom Budget übrig ist</string>
+    <string name="widget_21_desc">Schlicht: Restbetrag, Balken und Plus</string>
+    <string name="widget_22_desc">Ring: Ausgaben nach Kategorie, Restbetrag und Plus</string>
     <string name="widget_small_desc">Kompakt: Restbetrag und Plus-Knopf</string>
     <string name="widget_left_label">übrig diesen Monat</string>
 </resources>

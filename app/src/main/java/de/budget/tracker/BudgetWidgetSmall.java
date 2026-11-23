@@ -8,6 +8,6 @@ import android.content.Context;
 public class BudgetWidgetSmall extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
-        for (int id : ids) manager.updateAppWidget(id, BudgetWidget.build(context, true));
+        for (int id : ids) manager.updateAppWidget(id, BudgetWidget.build(context, BudgetWidget.COMPACT));
     }
 }
