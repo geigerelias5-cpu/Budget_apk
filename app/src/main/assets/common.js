@@ -22,8 +22,10 @@ window.saveState = function(S){
   try{ if(NATIVE) Android.setData(j); else localStorage.setItem(KEY, j); }catch(e){}
 };
 
-window.eur = new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'});
-window.eur0 = v => eur.format(v).replace(/,00(\s)/,'$1');
+/* Betrag mit etwas mehr Abstand vor dem €-Zeichen */
+const _eurFmt = new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'});
+window.eur = {format: v => _eurFmt.format(v).replace(/\s€$/,'\u00A0\u202F€')};
+window.eur0 = v => eur.format(v).replace(/,00(?=\s)/,'');
 window.num = s => {
   s = String(s).trim().replace(/\s|€/g,'');
   if(s.includes(',')) s = s.replace(/\./g,'').replace(',','.');
