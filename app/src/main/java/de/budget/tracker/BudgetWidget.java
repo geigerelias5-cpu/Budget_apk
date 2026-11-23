@@ -10,7 +10,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.RadialGradient;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.net.Uri;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -80,7 +82,7 @@ public class BudgetWidget extends AppWidgetProvider {
             v.setProgressBar(over ? R.id.w_bar_red : R.id.w_bar, 100, pct, false);
         }
         if (type == RING) {
-            v.setTextViewText(R.id.w_month, new SimpleDateFormat("MMMM", Locale.GERMANY).format(new Date()));
+            v.setTextViewText(R.id.w_month, left != null && left < 0 ? "über Budget" : "übrig");
             v.setImageViewBitmap(R.id.w_ring, ring(mo));
         }
 
@@ -123,21 +125,35 @@ public class BudgetWidget extends AppWidgetProvider {
                 PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    /** Zeichnet den Ring: farbige Bögen je Kategorie, gepunktet für den Rest des Budgets. */
+    /** Zeichnet das runde Widget: schwarzer Kreis, farbige Bögen je Kategorie, gepunktet für den Rest. */
     private static Bitmap ring(Store.Month mo) {
-        final int size = 280;
-        final float stroke = 34f;
+        final int size = 360;
+        final float c = size / 2f;
         Bitmap b = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas cv = new Canvas(b);
-        float pad = stroke / 2f + 4f;
-        RectF r = new RectF(pad, pad, size - pad, size - pad);
+
+        // Hintergrund-Kreis mit leichtem Verlauf und feinem Rand
+        Paint bg = new Paint(Paint.ANTI_ALIAS_FLAG);
+        bg.setShader(new RadialGradient(c, size * 0.35f, size * 0.55f,
+                0xFF161616, 0xFF000000, Shader.TileMode.CLAMP));
+        cv.drawCircle(c, c, c - 2f, bg);
+        Paint edge = new Paint(Paint.ANTI_ALIAS_FLAG);
+        edge.setStyle(Paint.Style.STROKE);
+        edge.setStrokeWidth(2.5f);
+        edge.setColor(0x26FFFFFF);
+        cv.drawCircle(c, c, c - 2f, edge);
+
+        float inner = size * (1f - 14f / 150f);
+        float radius = inner * 0.44f;
+        float stroke = inner * 0.07f;
+        RectF r = new RectF(c - radius, c - radius, c + radius, c + radius);
 
         Paint dots = new Paint(Paint.ANTI_ALIAS_FLAG);
         dots.setStyle(Paint.Style.STROKE);
-        dots.setStrokeWidth(8f);
+        dots.setStrokeWidth(inner * 0.026f);
         dots.setStrokeCap(Paint.Cap.ROUND);
         dots.setColor(0xFF555555);
-        dots.setPathEffect(new DashPathEffect(new float[]{0.1f, 22f}, 0));
+        dots.setPathEffect(new DashPathEffect(new float[]{0.1f, inner * 0.039f}, 0));
         cv.drawArc(r, 0, 360, false, dots);
         if (mo == null) return b;
 
@@ -152,7 +168,7 @@ public class BudgetWidget extends AppWidgetProvider {
             double val = mo.byCat[i];
             if (val <= 0) continue;
             float sweep = (float) (val / base * 360.0);
-            float gap = sweep > 4f ? 1.5f : 0f;
+            float gap = sweep > 4f ? 1.6f : 0f;
             p.setColor(i == 6 ? Store.FIX_COLOR : Store.CAT_COLORS[i]);
             cv.drawArc(r, start, Math.max(sweep - gap, 0.5f), false, p);
             start += sweep;
