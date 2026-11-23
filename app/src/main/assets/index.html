@@ -410,6 +410,13 @@ footer{text-align:center;color:var(--mut);font-size:13px;padding:0 16px 32px}
 .dsg .pv-i{background:#f2f2f7}
 .dsg .pv-i::after{content:"";position:absolute;left:10px;right:10px;top:12px;height:34px;border-radius:7px;background:#fff;box-shadow:0 0 0 0 #0000,inset 26px 0 0 -18px #007aff}
 
+/* Dauerbetrag: eigener Ziffernblock */
+#fs .fsamt{width:100%;border:0;background:none;color:inherit;cursor:pointer;margin:6px 0 4px;height:56px}
+#fs .fsamt .v{font-size:40px}
+#fs .pad{margin-top:4px}
+#fs .pad button{height:46px}
+#fs .pad .kdel{font-family:inherit;font-size:20px;color:inherit;opacity:.75}
+
 /* ===== Android-App: Vollbild statt Telefonrahmen ===== */
 html,body{height:100%;margin:0;overflow:hidden;background:var(--scr)}
 body{-webkit-tap-highlight-color:transparent;user-select:none}
@@ -528,7 +535,7 @@ button:focus{outline:none}
         <div class="ns" id="fs" role="dialog" aria-label="Dauerbetrag">
           <h4 id="fsT">Dauerbetrag hinzufügen</h4>
           <p>Zählt ab diesem Monat jeden Monat als ausgegeben, in der eigenen Kategorie „Dauerbeträge“.</p>
-          <div class="fs2"><input id="fsN" maxlength="30" placeholder="z. B. Netflix" autocomplete="off"><label class="eu"><input id="fsA" inputmode="decimal" placeholder="0,00" aria-label="Betrag pro Monat"><span>€</span></label></div>
+          <input id="fsN" maxlength="30" placeholder="Name, z. B. Netflix" autocomplete="off" enterkeyhint="done"><button type="button" class="amtq fsamt" id="fsA" aria-label="Betrag pro Monat"><span class="v ph" id="fsV">0,00</span><span class="u">€</span></button><div class="pad" id="fsP"></div>
           <div class="row"><button type="button" class="no" id="fsX">Abbrechen</button><button type="button" class="ok" id="fsO">Speichern</button></div>
           <button type="button" class="del" id="fsD" hidden>Dauerbetrag löschen</button>
         </div>
@@ -766,12 +773,12 @@ function renderFixed(){const fx=S.fixed||[];
  if(!fx.length)$('fxl').innerHTML='<li class="fxe">Noch keine Dauerbeträge.</li>'}
 let fEdit=null,fCat='fix';
 function fPick(){}
-function openF(f){fEdit=f||null;$('fsT').textContent=f?'Dauerbetrag bearbeiten':'Dauerbetrag hinzufügen';$('fsN').value=f?f.name:'';$('fsA').value=f?String(f.amt).replace('.',','):'';
- $('fsD').hidden=!f;$('fq').classList.add('on');$('fq').setAttribute('aria-hidden','false');$('fs').classList.add('on');setTimeout(()=>$('fsN').focus(),350)}
+function openF(f){fEdit=f||null;$('fsT').textContent=f?'Dauerbetrag bearbeiten':'Dauerbetrag hinzufügen';$('fsN').value=f?f.name:'';fv=f?String(f.amt).replace('.',','):'';fUpd();
+ $('fsD').hidden=!f;$('fq').classList.add('on');$('fq').setAttribute('aria-hidden','false');$('fs').classList.add('on')}
 function closeF(){$('fs').classList.remove('on');$('fq').classList.remove('on');$('fq').setAttribute('aria-hidden','true');document.activeElement.blur()}
 $('fxAdd').onclick=()=>openF();$('fsX').onclick=closeF;$('fqDim').onclick=closeF;
 $('fxl').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b)openF(S.fixed.find(f=>f.id==b.dataset.f))});
-$('fsO').onclick=()=>{const name=$('fsN').value.trim(),amt=num($('fsA').value);
+$('fsO').onclick=()=>{const name=$('fsN').value.trim(),amt=num(fv);
  if(!name)return shake($('fsN'));if(!(amt>0))return shake($('fsA'));const k0=curYM();
  if(fEdit){Object.assign(fEdit,{name,amt,cat:fCat});for(const e of S.entries)if(e.fixed==fEdit.id&&ymOf(new Date(e.ts))==k0)Object.assign(e,{amt,cat:fCat,note:name})}
  else S.fixed.push({id:Date.now().toString(36),name,amt,cat:fCat,from:k0,skip:[]});
@@ -779,7 +786,18 @@ $('fsO').onclick=()=>{const name=$('fsN').value.trim(),amt=num($('fsA').value);
 $('fsD').onclick=()=>{if(!fEdit)return;const f=fEdit,k0=curYM(),oldE=S.entries.slice();
  S.fixed=S.fixed.filter(x=>x!==f);S.entries=S.entries.filter(e=>!(e.fixed==f.id&&ymOf(new Date(e.ts))==k0));save();closeF();render();openD();
  toast(`${esc(f.name)} entfernt`,()=>{S.fixed.push(f);S.entries=oldE;save();render()})};
-for(const id of ['fsN','fsA'])$(id).addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('fsO').click()}});
+/* Nach dem Tippen in Textfelder die Ansicht wieder ausrichten (iPhone/Android verschieben sie sonst) */
+document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||document.activeElement===document.body){scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}},60));
+$('fsN').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('fsN').blur()}});
+/* Ziffernblock für den Dauerbetrag (statt Handy-Tastatur) */
+let fv='';
+function fUpd(){const v=$('fsV');if(!fv){v.textContent='0,00';v.classList.add('ph')}else{v.classList.remove('ph');const [a,b]=fv.split(',');v.textContent=Number(a||'0').toLocaleString('de-DE')+(b!==undefined?','+b:'')}}
+$('fsP').innerHTML=['1','2','3','4','5','6','7','8','9','del','0',','].map(k=>k=='del'?`<button type="button" class="kdel" data-k="del" aria-label="Löschen">⌫</button>`:`<button type="button" data-k="${k}">${k}</button>`).join('');
+$('fsA').onclick=()=>$('fsN').blur();
+$('fsP').addEventListener('pointerdown',e=>{if(e.target.closest('button'))e.preventDefault()});
+$('fsP').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('fsN').blur();const k=b.dataset.k;
+ if(k=='del')fv=fv.slice(0,-1);else if(k==','){if(!fv.includes(','))fv=(fv||'0')+','}
+ else{const [a,c]=fv.split(',');if(c!==undefined){if(c.length>=2)return;fv+=k}else{if((a||'').length>=6)return;fv=(fv=='0'?'':fv)+k}}fUpd()});
 
 function render(o={}){
  applyFixed();
