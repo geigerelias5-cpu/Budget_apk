@@ -126,16 +126,6 @@ final class Store {
         }
     }
 
-    /** Gewähltes Design der App: "nothing", "glass" oder "ios". */
-    static String design(Context c) {
-        try {
-            String d = new JSONObject(read(c)).optString("design", "nothing");
-            return ("glass".equals(d) || "ios".equals(d)) ? d : "nothing";
-        } catch (Exception e) {
-            return "nothing";
-        }
-    }
-
     static int catIndex(String id) {
         if ("fix".equals(id)) return 6;
         for (int i = 0; i < CAT_IDS.length; i++) if (CAT_IDS[i].equals(id)) return i;

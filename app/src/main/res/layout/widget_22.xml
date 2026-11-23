@@ -6,14 +6,6 @@
     android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/w_circle"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:importantForAccessibility="no"
-        android:scaleType="fitCenter"
-        android:visibility="gone" />
-
-    <ImageView
         android:id="@+id/w_ring"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

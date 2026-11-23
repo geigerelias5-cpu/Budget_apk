@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Budget</title>
-
 <link rel="stylesheet" href="fonts.css">
 <style>
 /* VOICE: ruhig, technisch, knapp – wie ein Nothing-Systemwidget
@@ -131,7 +130,7 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .w22 .arc2{transition:stroke-dasharray .9s cubic-bezier(.2,.9,.2,1),stroke-dashoffset .9s cubic-bezier(.2,.9,.2,1)}
 .w22o{position:absolute;inset:0;border-radius:50%;border:0;background:none;cursor:pointer}
 .w22c{position:absolute;inset:0;padding-bottom:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.w22c b{margin-bottom:5px;font:900 15px/1.1 Doto,monospace;color:#f2f2f2;white-space:nowrap;transition:color .3s}.w22c b.neg{color:var(--red)}.w22c b.big{font-size:20px}
+.w22c b{margin-bottom:5px;font:900 15px/1.1 Doto,monospace;color:#f2f2f2;white-space:nowrap;transition:color .3s}.w22c b.neg{color:var(--red)}
 .w22c small{font-size:9px;color:#8a8a8a;letter-spacing:.04em;margin-top:5px}
 .w22p{pointer-events:auto;width:32px;height:32px;border-radius:50%;border:0;background:var(--red);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 16px -6px #d71921cc}
 .w22s{display:block;height:31px}
@@ -296,126 +295,6 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 footer{text-align:center;color:var(--mut);font-size:13px;padding:0 16px 32px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media(max-width:760px){.seg{display:flex}main .dev:not(.show){display:none}.phone{height:700px}}
-/* ================= Designs: Nothing (Standard) · Liquid Glass · iPhone ================= */
-.screen:is([data-design=ios],[data-design=glass]){
- --sys:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",system-ui,sans-serif;
- --numf:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",system-ui,sans-serif}
-.screen[data-design=glass]{--numf:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
-/* Systemschrift statt Hanken/Doto */
-.screen:is([data-design=ios],[data-design=glass]) *{font-family:var(--sys)!important;letter-spacing:normal}
-.screen:is([data-design=ios],[data-design=glass]) :is(.dot,.field input,.field span,.stat b,.tip b,.qs .amtq .v,.qs .amtq .u,.qs .hd b,.qs .pad button,.toast #tMsg b,.wopts .sz,.fs2 .eu input,.fs2 .eu span){
- font-family:var(--numf)!important;font-weight:700!important;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.screen:is([data-design=ios],[data-design=glass]) .mid .dot{font-size:38px;letter-spacing:-.02em}
-.screen:is([data-design=ios],[data-design=glass]) .qs .amtq .v{font-size:48px}
-.screen:is([data-design=ios],[data-design=glass]) .qs .pad button{font-size:26px;font-weight:500!important}
-.screen:is([data-design=ios],[data-design=glass]) .top h2{font-size:32px;font-weight:700;letter-spacing:-.02em}
-.screen:is([data-design=ios],[data-design=glass]) .tabs .ind{display:none}
-.screen:is([data-design=ios],[data-design=glass]) .tabs button[aria-selected=true]{color:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) .tabs button[aria-selected=true] svg path[stroke]{stroke:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) .ib{color:var(--acc);border:0}
-.screen:is([data-design=ios],[data-design=glass]) .fxc .fi{background:var(--acc);color:#fff}
-.screen:is([data-design=ios],[data-design=glass]) .mh em{background:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) .pri{background:var(--acc);color:#fff;border-radius:14px}
-.screen:is([data-design=ios],[data-design=glass]) .fab{background:var(--acc);box-shadow:0 12px 28px -10px color-mix(in srgb,var(--acc) 70%,transparent)}
-.screen:is([data-design=ios],[data-design=glass]) .cb .b{background:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) .cb .b.over{background:var(--red)}
-.screen:is([data-design=ios],[data-design=glass]) .cb .b.cur{background:repeating-linear-gradient(-45deg,var(--acc) 0 3px,transparent 3px 6px);border-color:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) .cb .b.cur.over{background:repeating-linear-gradient(-45deg,var(--red) 0 3px,transparent 3px 6px);border-color:var(--red)}
-.screen:is([data-design=ios],[data-design=glass]) .ckey i.s{background:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) .hist li.new .a{color:var(--acc)}
-/* Fenster (Eingabe, Notiz, Dauerbeträge, Widgets) */
-.screen:is([data-design=ios],[data-design=glass]) :is(.qs .sh,.ns){background:var(--sh-bg);color:var(--ink);border:var(--sh-border);box-shadow:var(--sh-shadow)}
-.screen:is([data-design=ios],[data-design=glass]) .qs .dim{background:#000}
-.screen:is([data-design=ios],[data-design=glass]) :is(.qs .hd,.ns p,.wsec,.wopts small,.wlock small,#ds .fxl li small,#ds .fxl li svg,#ds .fxsum){color:var(--mut)}
-.screen:is([data-design=ios],[data-design=glass]) :is(.qs .hd b,#ds .fxsum b,.wopts .sz){color:var(--ink)}
-.screen:is([data-design=ios],[data-design=glass]) .wopts .sz{color:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) .qs .amtq .v{color:var(--ink)}
-.screen:is([data-design=ios],[data-design=glass]) .qs .amtq .v.ph,.screen:is([data-design=ios],[data-design=glass]) .qs .amtq .u{color:var(--mut);opacity:.6}
-.screen:is([data-design=ios],[data-design=glass]) :is(.qs .cat,.qs .pad button,.ns input,.ns .no,#ds .fxl li button,.wopts button,.wlock){background:var(--key-bg);color:var(--ink);border:var(--key-border);box-shadow:var(--key-shadow)}
-.screen:is([data-design=ios],[data-design=glass]) .qs .pad button:active{background:var(--key-down)}
-.screen:is([data-design=ios],[data-design=glass]) .qs .pad .del{color:var(--ink)}
-.screen:is([data-design=ios],[data-design=glass]) .qs .cat[aria-pressed=true]{background:var(--acc);color:#fff;border-color:transparent}
-.screen:is([data-design=ios],[data-design=glass]) .ns .no{color:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) :is(.qs .sv,.ns .ok){background:var(--acc);color:#fff}
-.screen:is([data-design=ios],[data-design=glass]) .qs .sv:disabled{background:var(--key-bg);color:var(--mut)}
-.screen:is([data-design=ios],[data-design=glass]) .qs .sv.ok{background:#34c759;color:#fff}
-.screen:is([data-design=ios],[data-design=glass]) .ns input:focus{border-color:var(--acc)}
-.screen:is([data-design=ios],[data-design=glass]) .sw{background:var(--line)}
-.screen:is([data-design=ios],[data-design=glass]) .sw.on{background:#34c759}
-.screen:is([data-design=ios],[data-design=glass]) .toast .tbar{background:var(--acc)}
-
-/* ---------- iPhone Standard ---------- */
-.screen[data-design=ios]{--scr:light-dark(#f2f2f7,#000);--ink:light-dark(#000,#fff);--mut:light-dark(#8a8a8e,#8d8d93);--card:light-dark(#fff,#1c1c1e);
- --line:light-dark(#d1d1d6,#38383a);--red:#ff3b30;--acc:light-dark(#007aff,#0a84ff);
- --sh-bg:light-dark(#f2f2f7,#1c1c1e);--sh-border:0;--sh-shadow:0 -8px 40px -10px #0006;
- --key-bg:light-dark(#fff,#2c2c2e);--key-border:0;--key-shadow:0 1px 0 light-dark(#0000002e,#0000);--key-down:light-dark(#d1d1d6,#48484a)}
-.screen[data-design=ios] :is(.stat,.mc,.fxc,.sec,.field,.ib){border:0;border-radius:12px;background:var(--card)}
-.screen[data-design=ios] .ib{border-radius:50%}
-.screen[data-design=ios] .field{border-radius:12px}
-.screen[data-design=ios] .leg,.screen[data-design=ios] .hist{background:var(--card);border-radius:12px;padding:0 14px}
-.screen[data-design=ios] .leg li{padding:10px 0;border-bottom:.5px solid var(--line)}
-.screen[data-design=ios] .leg li:last-child,.screen[data-design=ios] .hist li:last-child{border-bottom:0}
-.screen[data-design=ios] .hist li{border-bottom:.5px solid var(--line)}
-.screen[data-design=ios] .sum{border:0;background:var(--card);border-radius:12px;padding:12px 14px}
-.screen[data-design=ios] h3{text-transform:uppercase;font-size:12px;letter-spacing:.02em;margin:22px 14px 6px}
-.screen[data-design=ios] .tabs{background:light-dark(#f9f9f9f0,#161616f0);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:.5px solid var(--line)}
-.screen[data-design=ios] .tabs button{font-size:10px;font-weight:500}
-.screen[data-design=ios] :is(.qs .sh,.ns){border-radius:14px}
-.screen[data-design=ios] .qs .pad button{border-radius:8px}
-.screen[data-design=ios] .qs .cat{border-radius:8px}
-.screen[data-design=ios] .toast{background:light-dark(#1c1c1ef2,#2c2c2ef2);border:0}
-
-/* ---------- Liquid Glass ---------- */
-.screen[data-design=glass]{--ink:light-dark(#0b0b14,#fff);--mut:light-dark(#0b0b1499,#ffffffa0);--line:light-dark(#ffffff99,#ffffff26);
- --card:light-dark(#ffffff5c,#ffffff17);--red:#ff3b30;--acc:light-dark(#0a6cff,#4da3ff);
- --glass-bg:light-dark(#ffffff52,#ffffff14);--glass-edge:light-dark(#ffffffb3,#ffffff33);--glass-hi:light-dark(#ffffffe6,#ffffff40);
- --sh-bg:light-dark(#ffffff8c,#1c1c2a8c);--sh-border:1px solid var(--glass-edge);--sh-shadow:inset 0 1px 0 var(--glass-hi),0 -10px 50px -10px #0005;
- --key-bg:light-dark(#ffffff73,#ffffff1f);--key-border:1px solid var(--glass-edge);--key-shadow:inset 0 1px 0 var(--glass-hi);--key-down:light-dark(#ffffffb3,#ffffff40);
- background:
-  radial-gradient(90% 60% at 8% 2%,light-dark(#8fb8ff,#1d3d9b) 0,transparent 60%),
-  radial-gradient(80% 60% at 100% 28%,light-dark(#ffb0c8,#7a1f57) 0,transparent 62%),
-  radial-gradient(90% 70% at 30% 100%,light-dark(#9ff0d6,#0d5f57) 0,transparent 62%),
-  light-dark(#e8edf7,#06070c)}
-.screen[data-design=glass] :is(.stat,.mc,.fxc,.sec,.field,.ib,.sum,.leg,.hist,.tabs,.qs .sh,.ns,.toast,.tip){
- -webkit-backdrop-filter:blur(24px) saturate(180%);backdrop-filter:blur(24px) saturate(180%)}
-.screen[data-design=glass] :is(.stat,.mc,.fxc,.sec,.field,.ib){background:var(--glass-bg);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 var(--glass-hi),0 10px 30px -14px #0004;border-radius:22px}
-.screen[data-design=glass] .ib{border-radius:50%}
-.screen[data-design=glass] .leg,.screen[data-design=glass] .hist,.screen[data-design=glass] .sum{background:var(--glass-bg);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 var(--glass-hi);border-radius:22px;padding:4px 16px}
-.screen[data-design=glass] .sum{padding:12px 16px}
-.screen[data-design=glass] .leg li{border-bottom:1px solid var(--line);padding:9px 0}
-.screen[data-design=glass] .leg li:last-child,.screen[data-design=glass] .hist li:last-child{border-bottom:0}
-.screen[data-design=glass] .hist li{border-bottom:1px solid var(--line)}
-.screen[data-design=glass] .tabs{margin:0 18px 14px;border:1px solid var(--glass-edge);border-radius:32px;background:var(--glass-bg);box-shadow:inset 0 1px 0 var(--glass-hi),0 14px 34px -14px #0006;padding:2px 6px}
-.screen[data-design=glass] .tabs button{min-height:50px;border-radius:28px;font-size:11px}
-.screen[data-design=glass] .tabs button[aria-selected=true]{background:var(--key-bg)}
-.screen[data-design=glass] .fab{bottom:88px;background:color-mix(in srgb,var(--acc) 82%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid #ffffff66;box-shadow:inset 0 1px 0 #ffffff80,0 14px 30px -10px color-mix(in srgb,var(--acc) 70%,transparent)}
-.screen[data-design=glass] .toast{bottom:94px;background:light-dark(#1c1c2ab3,#ffffff24);border:1px solid var(--glass-edge)}
-.screen[data-design=glass] :is(.qs .sh,.ns){border-radius:32px}
-.screen[data-design=glass] .qs .pad button{border-radius:22px}
-.screen[data-design=glass] .pri{border-radius:99px}
-.screen[data-design=glass] .tip{background:light-dark(#1c1c2acc,#ffffff2e)}
-
-.screen:is([data-design=ios],[data-design=glass]) .qs .cat[data-c=einkauf] i{background:var(--ink)!important}
-.screen:is([data-design=ios],[data-design=glass]) .qs .cat[data-c=einkauf][aria-pressed=true] i{background:#fff!important}
-/* Auswahl in den Einstellungen */
-.dsg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.dsg button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:16px;padding:8px 8px 10px;font:inherit;cursor:pointer;text-align:center}
-.dsg button[aria-pressed=true]{outline:2px solid var(--acc,var(--red));outline-offset:1px}
-.dsg i{display:block;height:58px;border-radius:11px;margin-bottom:7px;position:relative;overflow:hidden}
-.dsg b{display:block;font-size:13px}
-.dsg .pv-n{background:#000}
-.dsg .pv-n::after{content:"";position:absolute;inset:12px 26%;border-radius:50%;border:3px dotted #777;border-top-color:#d71921;border-right-color:#f2f2f2}
-.dsg .pv-g{background:radial-gradient(80% 70% at 10% 0,#8fb8ff,transparent 60%),radial-gradient(70% 70% at 100% 40%,#ffb0c8,transparent 60%),radial-gradient(80% 70% at 30% 100%,#9ff0d6,transparent 60%),#e8edf7}
-.dsg .pv-g::after{content:"";position:absolute;inset:14px 14px;border-radius:12px;background:#ffffff66;border:1px solid #ffffffcc;box-shadow:inset 0 1px 0 #fff}
-.dsg .pv-i{background:#f2f2f7}
-.dsg .pv-i::after{content:"";position:absolute;left:10px;right:10px;top:12px;height:34px;border-radius:7px;background:#fff;box-shadow:0 0 0 0 #0000,inset 26px 0 0 -18px #007aff}
-
-/* Dauerbetrag: eigener Ziffernblock */
-#fs .fsamt{width:100%;border:0;background:none;color:inherit;cursor:pointer;margin:6px 0 4px;height:56px}
-#fs .fsamt .v{font-size:40px}
-#fs .pad{margin-top:4px}
-#fs .pad button{height:46px}
-#fs .pad .kdel{font-family:inherit;font-size:20px;color:inherit;opacity:.75}
 
 /* ===== Android-App: Vollbild statt Telefonrahmen ===== */
 html,body{height:100%;margin:0;overflow:hidden;background:var(--scr)}
@@ -425,6 +304,13 @@ body{-webkit-tap-highlight-color:transparent;user-select:none}
 .page{padding-top:12px}
 input,textarea{user-select:text}
 button:focus{outline:none}
+
+/* Dauerbetrag: eigener Ziffernblock */
+#fs .fsamt{width:100%;border:0;background:none;color:inherit;cursor:pointer;margin:6px 0 4px;height:56px}
+#fs .fsamt .v{font-size:40px}
+#fs .pad{margin-top:4px}
+#fs .pad button{height:46px}
+#fs .pad .kdel{font-family:inherit;font-size:20px;color:inherit;opacity:.75}
 </style>
 </head>
 <body>
@@ -474,12 +360,6 @@ button:focus{outline:none}
         <div class="field"><input id="eB" inputmode="decimal" aria-label="Monatsbudget in Euro"><span>€</span></div>
         <div class="err" id="eE"></div>
         <button class="pri" id="eSave">Speichern</button>
-        <label>Design</label>
-        <div class="dsg" id="dsg">
-          <button type="button" data-d="nothing" aria-pressed="true"><i class="pv-n"></i><b>Nothing</b></button>
-          <button type="button" data-d="glass" aria-pressed="false"><i class="pv-g"></i><b>Liquid Glass</b></button>
-          <button type="button" data-d="ios" aria-pressed="false"><i class="pv-i"></i><b>iPhone</b></button>
-        </div>
         <label>Daten</label>
         <p>Der Monat beginnt automatisch am 1. neu. Alte Einträge bleiben gespeichert.</p>
         <button class="sec warn" id="eReset">Einträge dieses Monats löschen</button>
@@ -581,12 +461,6 @@ $('fab').onclick=()=>openQ();
 function show(v){const ch=view!=v||$('v'+v).hidden;view=v;$('fab').classList.toggle('hide',v!='M');$('vS').hidden=v!='S';$('vM').hidden=v!='M';$('vE').hidden=v!='E';
  if(ch){const el=v=='M'?$('p'+(page+1)):$('v'+v);el.classList.remove('enter');void el.offsetWidth;el.classList.add('enter');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('enter'),1000);if(v=='M')fresh=true}if(v=='E'){$('eB').value=String(S.budget).replace('.',',');$('eE').textContent='';arm(null)}}
 $('toSet').onclick=()=>show('E');
-/* Design wählen */
-function applyDesign(d){d=['nothing','glass','ios'].includes(d)?d:'nothing';$('vM').closest('.screen').dataset.design=d;
- for(const b of $('dsg').querySelectorAll('[data-d]'))b.setAttribute('aria-pressed',b.dataset.d==d);
- try{if(window.Android&&Android.setDesign)Android.setDesign(d)}catch(e){}
- const m=document.querySelector('meta[name=theme-color]');if(m)m.content=getComputedStyle($('vM').closest('.screen')).backgroundColor}
-$('dsg').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(!b)return;S.design=b.dataset.d;save();applyDesign(S.design);fresh=true;render()});
 let lockOn=false;
 function lockUI(){try{lockOn=NATIVE&&!!Android.lockEnabled()}catch(e){lockOn=false}$('wSw').classList.toggle('on',lockOn)}
 $('toWid').onclick=()=>{lockUI();$('wq').classList.add('on');$('wq').setAttribute('aria-hidden','false');$('ws').classList.add('on')};
@@ -786,7 +660,7 @@ $('fsO').onclick=()=>{const name=$('fsN').value.trim(),amt=num(fv);
 $('fsD').onclick=()=>{if(!fEdit)return;const f=fEdit,k0=curYM(),oldE=S.entries.slice();
  S.fixed=S.fixed.filter(x=>x!==f);S.entries=S.entries.filter(e=>!(e.fixed==f.id&&ymOf(new Date(e.ts))==k0));save();closeF();render();openD();
  toast(`${esc(f.name)} entfernt`,()=>{S.fixed.push(f);S.entries=oldE;save();render()})};
-/* Nach dem Tippen in Textfelder die Ansicht wieder ausrichten (iPhone/Android verschieben sie sonst) */
+/* Nach dem Tippen in Textfelder die Ansicht wieder ausrichten */
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||document.activeElement===document.body){scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}},60));
 $('fsN').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('fsN').blur()}});
 /* Ziffernblock für den Dauerbetrag (statt Handy-Tastatur) */
@@ -820,7 +694,7 @@ function render(o={}){
  if(o.newId){const n=$('hist').querySelector('.new .a');if(n)requestAnimationFrame(()=>requestAnimationFrame(()=>n.style.color='inherit'))}
  renderHistory();renderFixed();
 }
-applyDesign(S.design);window.goBack=()=>{
+window.goBack=()=>{
  if($('ns').classList.contains('on')){$('nsX').click();return true}
  if($('qs').classList.contains('on')){closeQ();return true}
  if($('fq').classList.contains('on')){closeF();return true}
@@ -829,7 +703,7 @@ applyDesign(S.design);window.goBack=()=>{
  if(view=='E'){document.activeElement.blur();show('M');render();return true}
  if(view=='M'&&page==1){goPage(0);return true}
  return false};
-window.nativeResume=()=>{const before=new Set(S.entries.map(e=>e.id));S=load();applyFixed();applyDesign(S.design);
+window.nativeResume=()=>{const before=new Set(S.entries.map(e=>e.id));S=load();applyFixed();
  const added=S.entries.filter(e=>!before.has(e.id)&&!e.fixed).sort((a,b)=>b.ts-a.ts)[0];
  if(!S.budget){show('S');return}if(view=='S')show('M');if(view=='M'&&page==0)fresh=true;render(added?{newId:added.id}:{})};
 show(S.budget?'M':'S');render();
