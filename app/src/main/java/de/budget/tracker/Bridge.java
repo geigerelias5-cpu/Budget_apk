@@ -7,6 +7,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.provider.Settings;
@@ -140,6 +141,29 @@ final class Bridge {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /** Passt Status- und Navigationsleiste an das gewählte Design an (nur in der Haupt-App). */
+    @JavascriptInterface
+    public void setDesign(String design) {
+        if (!(activity instanceof MainActivity)) return;
+        boolean night = (activity.getResources().getConfiguration().uiMode
+                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
+        int top, bottom;
+        if ("ios".equals(design)) {
+            top = night ? 0xFF000000 : 0xFFF2F2F7;
+            bottom = night ? 0xFF161616 : 0xFFF9F9F9;
+        } else if ("glass".equals(design)) {
+            top = night ? 0xFF0E1A3E : 0xFFC9DAFB;
+            bottom = night ? 0xFF07262A : 0xFFD7F2EA;
+        } else {
+            top = night ? 0xFF0C0C0C : 0xFFFAFAF8;
+            bottom = top;
+        }
+        activity.runOnUiThread(() -> {
+            activity.getWindow().setStatusBarColor(top);
+            activity.getWindow().setNavigationBarColor(bottom);
+        });
     }
 
     @JavascriptInterface

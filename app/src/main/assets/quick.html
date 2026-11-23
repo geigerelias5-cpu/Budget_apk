@@ -56,6 +56,36 @@ html,body{margin:0;height:100%;background:transparent;color:#f2f2f2;font:16px/1.
 button:focus{outline:none}
 [hidden]{display:none!important}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* ===== Designs (gleich wie in der App) ===== */
+body:is([data-design=ios],[data-design=glass]){color-scheme:light dark;--sys:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;color:var(--ink)}
+body:is([data-design=ios],[data-design=glass]) *{font-family:var(--sys)!important}
+body:is([data-design=ios],[data-design=glass]) :is(.hd b,.amt .v,.amt .u,.pad button){font-weight:700!important;font-variant-numeric:tabular-nums}
+body:is([data-design=ios],[data-design=glass]) .pad button{font-weight:500!important;font-size:26px}
+body[data-design=glass] :is(.hd b,.amt .v,.amt .u,.pad button){font-family:ui-rounded,"SF Pro Rounded",var(--sys)!important}
+body[data-design=ios]{--ink:light-dark(#000,#fff);--mut:light-dark(#8a8a8e,#8d8d93);--acc:light-dark(#007aff,#0a84ff);--red:#ff3b30;
+ --sh:light-dark(#f2f2f7,#1c1c1e);--shb:0;--key:light-dark(#fff,#2c2c2e);--keyb:0;--keys:0 1px 0 light-dark(#0000002e,#0000);--down:light-dark(#d1d1d6,#48484a)}
+body[data-design=glass]{--ink:light-dark(#0b0b14,#fff);--mut:light-dark(#0b0b1499,#ffffffa0);--acc:light-dark(#0a6cff,#4da3ff);--red:#ff3b30;
+ --sh:light-dark(#ffffffa6,#1c1c2aa6);--shb:1px solid light-dark(#ffffffb3,#ffffff33);--key:light-dark(#ffffff80,#ffffff1f);--keyb:1px solid light-dark(#ffffffb3,#ffffff33);--keys:inset 0 1px 0 light-dark(#ffffffe6,#ffffff40);--down:light-dark(#ffffffcc,#ffffff40)}
+body:is([data-design=ios],[data-design=glass]) :is(.sheet,.ns){background:var(--sh);border:var(--shb);color:var(--ink)}
+body[data-design=glass] :is(.sheet,.ns){-webkit-backdrop-filter:blur(26px) saturate(180%);backdrop-filter:blur(26px) saturate(180%);border-radius:32px}
+body[data-design=ios] :is(.sheet,.ns){border-radius:16px}
+body:is([data-design=ios],[data-design=glass]) :is(.hd,.ns p,.nob p){color:var(--mut)}
+body:is([data-design=ios],[data-design=glass]) :is(.hd b,.amt .v){color:var(--ink)}
+body:is([data-design=ios],[data-design=glass]) .hd b.neg{color:var(--red)}
+body:is([data-design=ios],[data-design=glass]) :is(.amt .v.ph,.amt .u){color:var(--mut);opacity:.6}
+body:is([data-design=ios],[data-design=glass]) :is(.cat,.pad button,.ns input,.no2,.app){background:var(--key);color:var(--ink);border:var(--keyb);box-shadow:var(--keys)}
+body:is([data-design=ios],[data-design=glass]) .pad button:active{background:var(--down)}
+body:is([data-design=ios],[data-design=glass]) .pad .del{color:var(--ink)}
+body:is([data-design=ios],[data-design=glass]) .cat[aria-pressed=true]{background:var(--acc);color:#fff;border-color:transparent}
+body:is([data-design=ios],[data-design=glass]) .cat[data-c=einkauf] i{background:var(--ink)!important}
+body:is([data-design=ios],[data-design=glass]) .cat[data-c=einkauf][aria-pressed=true] i{background:#fff!important}
+body:is([data-design=ios],[data-design=glass]) :is(.go,.ok2){background:var(--acc);color:#fff}
+body:is([data-design=ios],[data-design=glass]) .go:disabled{background:var(--key);color:var(--mut)}
+body:is([data-design=ios],[data-design=glass]) .go.ok{background:#34c759;color:#fff}
+body:is([data-design=ios],[data-design=glass]) .no2{color:var(--acc)}
+body[data-design=ios] :is(.pad button,.cat){border-radius:9px}
+body[data-design=glass] .pad button{border-radius:22px}
 </style>
 </head>
 <body>
@@ -131,7 +161,7 @@ $('nobGo').onclick=()=>{if(NATIVE)Android.openApp()};
 $('dim').onclick=()=>dismiss();
 
 window.dismiss=()=>{if($('ns').classList.contains('on')){$('nsX').click();return true}document.body.classList.remove('open');setTimeout(()=>{if(NATIVE)Android.close()},380);return true};
-window.reopen=()=>{S=loadState();s='';busy=false;note='';closeN();
+window.reopen=()=>{S=loadState();s='';busy=false;note='';closeN();document.body.dataset.design=S.design||'nothing';
  $('go').classList.remove('ok');$('goT').textContent='Speichern';
  const has=S.budget>0;$('form').hidden=!has;$('nob').hidden=has;
  const sc=NATIVE?Android.startCategory():'';selectCat(sc);upd(false);if(has)showLeft();if(has&&sc=='sonst')setTimeout(openN,400);
