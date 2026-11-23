@@ -7,6 +7,7 @@ import android.webkit.WebView;
 
 public class MainActivity extends Activity {
     static final int REQ_NOTIFY = 7;
+    static final int REQ_IMPORT = 8;
     private WebView web;
     private boolean firstResume = true;
 
@@ -16,6 +17,26 @@ public class MainActivity extends Activity {
         web = Web.create(this, new Bridge(this, null), "index.html", false);
         web.setBackgroundColor(getColor(R.color.screen));
         setContentView(web);
+    }
+
+    /** Ergebnis der Dateiauswahl beim Import: Text an die Webansicht geben. */
+    @Override
+    @SuppressWarnings("deprecation")
+    protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != REQ_IMPORT || resultCode != RESULT_OK || data == null || data.getData() == null) return;
+        String text = "";
+        try (java.io.InputStream in = getContentResolver().openInputStream(data.getData())) {
+            if (in != null) {
+                java.io.ByteArrayOutputStream buf = new java.io.ByteArrayOutputStream();
+                byte[] b = new byte[8192];
+                int n;
+                while ((n = in.read(b)) > 0 && buf.size() < 20_000_000) buf.write(b, 0, n);
+                text = buf.toString("UTF-8");
+            }
+        } catch (Exception ignored) {
+        }
+        web.evaluateJavascript("window.importResult && importResult(" + org.json.JSONObject.quote(text) + ")", null);
     }
 
     @Override

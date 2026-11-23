@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Budget</title>
+
 <link rel="stylesheet" href="fonts.css">
 <style>
 /* VOICE: ruhig, technisch, knapp – wie ein Nothing-Systemwidget
@@ -130,7 +131,7 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .w22 .arc2{transition:stroke-dasharray .9s cubic-bezier(.2,.9,.2,1),stroke-dashoffset .9s cubic-bezier(.2,.9,.2,1)}
 .w22o{position:absolute;inset:0;border-radius:50%;border:0;background:none;cursor:pointer}
 .w22c{position:absolute;inset:0;padding-bottom:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.w22c b{margin-bottom:5px;font:900 15px/1.1 Doto,monospace;color:#f2f2f2;white-space:nowrap;transition:color .3s}.w22c b.neg{color:var(--red)}
+.w22c b{margin-bottom:5px;font:900 15px/1.1 Doto,monospace;color:#f2f2f2;white-space:nowrap;transition:color .3s}.w22c b.neg{color:var(--red)}.w22c b.big{font-size:20px}
 .w22c small{font-size:9px;color:#8a8a8a;letter-spacing:.04em;margin-top:5px}
 .w22p{pointer-events:auto;width:32px;height:32px;border-radius:50%;border:0;background:var(--red);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 16px -6px #d71921cc}
 .w22s{display:block;height:31px}
@@ -291,10 +292,20 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .fab{position:absolute;right:16px;bottom:80px;height:52px;padding:0 20px 0 16px;border-radius:99px;border:0;background:var(--red);color:#fff;display:flex;align-items:center;gap:8px;font:700 15px "Hanken Grotesk",system-ui,sans-serif;box-shadow:0 14px 30px -10px #d7192199;z-index:5;cursor:pointer;transition:transform .25s,opacity .3s}
 .fab.hide{transform:scale(.6);opacity:0;pointer-events:none}
 .hist{margin-bottom:70px}
+.xio{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.xio .sec{margin-top:0;display:flex;align-items:center;justify-content:center;gap:8px}
+.xinfo{font-size:13px!important;margin:8px 2px 0!important;min-height:18px;color:var(--mut);overflow-wrap:anywhere}
 [hidden]{display:none!important}
 footer{text-align:center;color:var(--mut);font-size:13px;padding:0 16px 32px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 @media(max-width:760px){.seg{display:flex}main .dev:not(.show){display:none}.phone{height:700px}}
+
+/* Dauerbetrag: eigener Ziffernblock */
+#fs .fsamt{width:100%;border:0;background:none;color:inherit;cursor:pointer;margin:6px 0 4px;height:56px}
+#fs .fsamt .v{font-size:40px}
+#fs .pad{margin-top:4px}
+#fs .pad button{height:46px}
+#fs .pad .kdel{font-family:inherit;font-size:20px;color:inherit;opacity:.75}
 
 /* ===== Android-App: Vollbild statt Telefonrahmen ===== */
 html,body{height:100%;margin:0;overflow:hidden;background:var(--scr)}
@@ -304,13 +315,6 @@ body{-webkit-tap-highlight-color:transparent;user-select:none}
 .page{padding-top:12px}
 input,textarea{user-select:text}
 button:focus{outline:none}
-
-/* Dauerbetrag: eigener Ziffernblock */
-#fs .fsamt{width:100%;border:0;background:none;color:inherit;cursor:pointer;margin:6px 0 4px;height:56px}
-#fs .fsamt .v{font-size:40px}
-#fs .pad{margin-top:4px}
-#fs .pad button{height:46px}
-#fs .pad .kdel{font-family:inherit;font-size:20px;color:inherit;opacity:.75}
 </style>
 </head>
 <body>
@@ -322,6 +326,8 @@ button:focus{outline:none}
         <label class="field"><input id="sB" inputmode="decimal" placeholder="800" aria-label="Monatsbudget in Euro"><span>€</span></label>
         <div class="err" id="sE"></div>
         <button class="pri" id="sGo">Los geht's</button>
+        <button class="sec" id="sImp">Sicherung importieren</button>
+        <p class="xinfo" id="sInfo" aria-live="polite"></p>
       </div>
 
       <div class="appv" id="vM" hidden>
@@ -360,6 +366,11 @@ button:focus{outline:none}
         <div class="field"><input id="eB" inputmode="decimal" aria-label="Monatsbudget in Euro"><span>€</span></div>
         <div class="err" id="eE"></div>
         <button class="pri" id="eSave">Speichern</button>
+        <label>Daten übertragen</label>
+        <p>Sichert alle Einträge, dein Budget und die Dauerbeträge in einer Datei. Auf dem neuen Gerät „Importieren“ tippen und die Datei auswählen.</p>
+        <div class="xio"><button class="sec" id="eExp">Exportieren</button><button class="sec" id="eImp">Importieren</button></div>
+        <p class="xinfo" id="eInfo" aria-live="polite"></p>
+        <input type="file" id="impFile" accept=".json,application/json,text/plain" hidden>
         <label>Daten</label>
         <p>Der Monat beginnt automatisch am 1. neu. Alte Einträge bleiben gespeichert.</p>
         <button class="sec warn" id="eReset">Einträge dieses Monats löschen</button>
@@ -482,6 +493,32 @@ $('eSave').onclick=()=>{if(setBudget('eB','eE')){render();show('M');toast('Budge
 let armed=null;function arm(b){armed=b;$('eReset').textContent=b=='r'?'Wirklich löschen? Nochmal tippen':'Einträge dieses Monats löschen';$('eAll').textContent=b=='a'?'Wirklich alles löschen? Nochmal tippen':'Alles zurücksetzen'}
 $('eReset').onclick=()=>{if(armed!='r')return arm('r');const old=S.entries.slice();S.entries=S.entries.filter(e=>!inMonth(e));save();arm(null);render();show('M');toast('Monat geleert',()=>{S.entries=old;save();render()})};
 $('eAll').onclick=()=>{if(armed!='a')return arm('a');S={budget:0,entries:[],budgets:{},fixed:[]};arm(null);render();show('S')};
+
+/* Export & Import */
+const two=n=>String(n).padStart(2,'0');
+function backupName(){const d=new Date();return `Budget-Sicherung-${d.getFullYear()}-${two(d.getMonth()+1)}-${two(d.getDate())}.json`}
+function backupJSON(){return JSON.stringify({app:'budget',format:1,exported:new Date().toISOString(),data:S},null,1)}
+const hasBridge=m=>typeof window.Android!=='undefined'&&typeof Android[m]==='function';
+$('eExp').onclick=async()=>{const json=backupJSON(),name=backupName(),info=$('eInfo');info.textContent='';
+ if(hasBridge('exportData')){let r='';try{r=Android.exportData(json,name)}catch(e){}
+  info.textContent=r?`Gespeichert: ${r}`:'Speichern hat nicht geklappt.';return}
+ const file=new File([json],name,{type:'application/json'});
+ try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:name});info.textContent='Sicherung erstellt. Auf dem iPhone z. B. „In Dateien sichern“ wählen.';return}}
+ catch(e){if(e&&e.name==='AbortError'){return}}
+ try{const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);info.textContent=`Gespeichert: ${name}`}catch(e){info.textContent='Speichern hat nicht geklappt.'}};
+$('eImp').onclick=()=>{$('eInfo').textContent='';if(hasBridge('importData')){Android.importData();return}$('impFile').value='';$('impFile').click()};
+$('sImp').onclick=()=>$('eImp').click();
+$('impFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)f.text().then(applyImport,()=>applyImport(''))};
+window.importResult=txt=>{if(txt)applyImport(txt)};
+function applyImport(txt){let d;
+ try{const o=JSON.parse(txt);d=o&&o.data?o.data:o;if(!d||!Array.isArray(d.entries)||!(Number(d.budget)>=0))throw 0}
+ catch(e){$('eInfo').textContent=$('sInfo').textContent='Diese Datei ist keine Budget-Sicherung.';return}
+ const old=JSON.parse(JSON.stringify(S));
+ S=Object.assign({budget:0,entries:[],budgets:{},fixed:[]},d);S.budget=Number(S.budget)||0;applyFixed();save();
+ $('eInfo').textContent=`Importiert: ${S.entries.length} Einträge, ${S.fixed.length} Dauerbeträge.`;
+ if(S.budget){show('M');render()}else show('S');
+ toast('Daten importiert',()=>{S=old;save();if(S.budget){show('M');render()}else show('S')})}
 
 /* Toast */
 let undoFn=null;
@@ -660,7 +697,7 @@ $('fsO').onclick=()=>{const name=$('fsN').value.trim(),amt=num(fv);
 $('fsD').onclick=()=>{if(!fEdit)return;const f=fEdit,k0=curYM(),oldE=S.entries.slice();
  S.fixed=S.fixed.filter(x=>x!==f);S.entries=S.entries.filter(e=>!(e.fixed==f.id&&ymOf(new Date(e.ts))==k0));save();closeF();render();openD();
  toast(`${esc(f.name)} entfernt`,()=>{S.fixed.push(f);S.entries=oldE;save();render()})};
-/* Nach dem Tippen in Textfelder die Ansicht wieder ausrichten */
+/* Nach dem Tippen in Textfelder die Ansicht wieder ausrichten (iPhone/Android verschieben sie sonst) */
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||document.activeElement===document.body){scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}},60));
 $('fsN').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('fsN').blur()}});
 /* Ziffernblock für den Dauerbetrag (statt Handy-Tastatur) */

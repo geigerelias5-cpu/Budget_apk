@@ -6,7 +6,15 @@ import android.app.StatusBarManager;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.provider.MediaStore;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.provider.Settings;
@@ -140,6 +148,59 @@ final class Bridge {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * Speichert eine Sicherung im Ordner „Download/Budget“ und zusätzlich in der App selbst.
+     * Gibt den Speicherort zurück (leer bei Fehler).
+     */
+    @JavascriptInterface
+    public String exportData(String json, String name) {
+        byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+        // Kopie in der App (bleibt, solange die App installiert ist)
+        try {
+            File dir = new File(activity.getFilesDir(), "sicherungen");
+            if (!dir.exists()) dir.mkdirs();
+            try (FileOutputStream out = new FileOutputStream(new File(dir, name))) { out.write(bytes); }
+            File[] all = dir.listFiles();
+            if (all != null && all.length > 10) {
+                java.util.Arrays.sort(all, (a, b) -> Long.compare(a.lastModified(), b.lastModified()));
+                for (int i = 0; i < all.length - 10; i++) all[i].delete();
+            }
+        } catch (Exception ignored) {
+        }
+        // Sichtbare Datei im Download-Ordner (ohne Berechtigung ab Android 10)
+        try {
+            ContentValues v = new ContentValues();
+            v.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+            v.put(MediaStore.MediaColumns.MIME_TYPE, "application/json");
+            v.put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/Budget");
+            Uri uri = activity.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+            if (uri == null) return "";
+            try (OutputStream out = activity.getContentResolver().openOutputStream(uri)) {
+                if (out == null) return "";
+                out.write(bytes);
+            }
+            return "Download/Budget/" + name;
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** Öffnet die Dateiauswahl; das Ergebnis kommt über window.importResult(text) zurück. */
+    @JavascriptInterface
+    public void importData() {
+        activity.runOnUiThread(() -> {
+            Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            i.addCategory(Intent.CATEGORY_OPENABLE);
+            i.setType("*/*");
+            i.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"application/json", "text/plain", "application/octet-stream"});
+            try {
+                activity.startActivityForResult(i, MainActivity.REQ_IMPORT);
+            } catch (Exception e) {
+                // keine Dateiauswahl verfügbar
+            }
+        });
     }
 
     @JavascriptInterface
