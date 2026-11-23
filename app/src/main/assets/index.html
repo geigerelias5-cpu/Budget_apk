@@ -16,6 +16,26 @@ html,body{margin:0;height:100%;background:var(--scr);color:var(--ink);font:16px/
 .top{display:flex;justify-content:space-between;align-items:center;margin:8px 0 2px}
 .top h2{font-size:24px;margin:0;line-height:1.1}
 .ib{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;flex:none}
+.btns{display:flex;gap:8px}
+.ib svg{transition:transform .5s cubic-bezier(.2,.9,.2,1)}#toSet:active svg{transform:rotate(60deg)}
+/* Widget-Auswahl */
+.wsh{position:fixed;inset:0;z-index:20;pointer-events:none}
+.wsh .bg{position:absolute;inset:0;background:#000;opacity:0;transition:opacity .35s}
+.wsh .pn{position:absolute;left:10px;right:10px;bottom:10px;background:var(--card);border:1px solid var(--line);border-radius:30px;padding:20px 18px 16px;transform:translateY(110%);transition:transform .45s cubic-bezier(.2,.9,.2,1)}
+.wsh.on{pointer-events:auto}.wsh.on .bg{opacity:.45}.wsh.on .pn{transform:none}
+.wsh h2{font-size:22px;margin:0 0 4px}.wsh p{color:var(--mut);font-size:14px;margin:0 0 14px}
+.opt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--scr);color:var(--ink);border-radius:22px;padding:14px;margin-bottom:10px;font:inherit}
+.opt .t{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.opt .t b{font-size:16px}.opt .t span{font:900 18px Doto,monospace;color:var(--mut)}
+.opt small{color:var(--mut);font-size:13px;display:block;margin-top:8px}
+.opt .tag{font:600 11px Hanken,sans-serif;color:#fff;background:var(--red);border-radius:99px;padding:2px 8px;margin-left:6px;vertical-align:2px}
+.mini{background:#000;border-radius:16px;padding:10px 12px;color:#f2f2f2}
+.mini .r{display:flex;justify-content:space-between;align-items:center}
+.mini .l{font-size:10px;color:#8a8a8a;line-height:1.2}.mini .v{font:900 18px Doto,monospace;line-height:1.1}
+.mini .p{width:26px;height:26px;border-radius:50%;background:var(--red);display:grid;place-items:center;color:#fff;font-size:17px;line-height:1}
+.mini .g{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:7px}
+.mini .g i{height:16px;border-radius:99px;background:#141414;border:1px solid #ffffff1c}
+.wsh .cl{width:100%;min-height:46px;border:0;background:none;color:var(--mut);font:500 15px Hanken,sans-serif}
 .mon{color:var(--mut);font-size:14px;margin:2px 0 0}
 .ring{position:relative;width:min(68vw,270px);aspect-ratio:1;margin:18px auto 10px}
 .ring svg{width:100%;height:100%;rotate:-90deg}
@@ -52,10 +72,10 @@ h3{font-size:14px;color:var(--mut);font-weight:500;margin:20px 0 4px}
 .err{color:var(--red);font-size:14px;min-height:20px;margin-top:6px}
 .set label{font-size:14px;color:var(--mut);display:block;margin:18px 0 6px}
 /* Toast */
-.toast{position:fixed;left:18px;right:18px;bottom:96px;z-index:10;background:#000;color:#f2f2f2;border:1px solid #ffffff1f;border-radius:99px;padding:6px 6px 6px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 22px 44px -14px #000c;overflow:hidden;
+.toast{position:fixed;left:18px;right:18px;bottom:96px;z-index:10;background:#000;color:#f2f2f2;border:1px solid #ffffff1f;border-radius:26px;padding:6px 6px 6px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 22px 44px -14px #000c;overflow:hidden;
  opacity:0;transform:translateY(24px) scale(.96);filter:blur(4px);pointer-events:none;transition:transform .5s cubic-bezier(.2,.9,.2,1),opacity .35s,filter .35s}
 .toast.on{opacity:1;transform:none;filter:none;pointer-events:auto}
-.toast #tMsg{flex:1;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast #tMsg{flex:1;font-size:14px;line-height:1.35;padding:6px 0}
 .toast #tMsg b{font:900 15px Doto,monospace;margin-right:4px}
 .toast button{flex:none;border:0;background:#f2f2f2;color:#000;font:600 14px Hanken,sans-serif;height:38px;padding:0 16px;border-radius:99px}
 .tbar{position:absolute;left:18px;right:18px;bottom:0;height:2px;background:var(--red);transform-origin:left;transform:scaleX(0)}
@@ -90,7 +110,7 @@ button:focus{outline:none}
 
 <div class="view" id="vM" hidden>
   <div class="top"><div><h2>Budget</h2><p class="mon" id="mM"></p></div>
-    <button class="ib" id="toSet" aria-label="Einstellungen"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="3"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3M4 4l2 2M14 14l2 2M4 16l2-2M14 6l2-2"/></svg></button></div>
+    <div class="btns"><button class="ib" id="toWid" aria-label="Widget hinzufügen"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><path d="M17.5 14.2v6.6M14.2 17.5h6.6"/></svg></button><button class="ib" id="toSet" aria-label="Einstellungen"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
   <div class="ring"><svg viewBox="0 0 100 100" id="ring"></svg>
     <div class="mid" id="mid"><span class="dot" id="mL">0 €</span><small id="mS">übrig</small></div></div>
   <div class="sum"><span>Ausgegeben <b id="mSp">0 €</b></span><span>Budget <b id="mB">0 €</b></span></div>
@@ -112,6 +132,24 @@ button:focus{outline:none}
   <button class="sec warn" id="eAll">Alles zurücksetzen</button>
 </div>
 
+<div class="wsh" id="wsh" aria-hidden="true">
+  <div class="bg" id="wshBg"></div>
+  <div class="pn" role="dialog" aria-label="Widget hinzufügen">
+    <h2>Widget hinzufügen</h2>
+    <p>Wähle eine Größe. Danach fragt dein Handy, ob es auf den Startbildschirm soll.</p>
+    <button class="opt" data-size="large">
+      <div class="t"><b>Standard<i class="tag">Empfohlen</i></b><span>4×2</span></div>
+      <div class="mini"><div class="r"><div><div class="l">übrig diesen Monat</div><div class="v" id="pv1">–</div></div><div class="p">+</div></div><div class="g"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <small>Restbetrag, Plus-Knopf und alle 6 Kategorien zum direkten Antippen</small>
+    </button>
+    <button class="opt" data-size="small">
+      <div class="t"><b>Kompakt</b><span>4×1</span></div>
+      <div class="mini"><div class="r"><div><div class="l">übrig diesen Monat</div><div class="v" id="pv2">–</div></div><div class="p">+</div></div></div>
+      <small>Nur Restbetrag und Plus-Knopf, schmal und unauffällig</small>
+    </button>
+    <button class="cl" id="wshX">Abbrechen</button>
+  </div>
+</div>
 <button class="fab hide" id="fab" aria-label="Ausgabe eintragen"><svg width="24" height="24" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg></button>
 <div class="toast" id="toast" role="status" aria-live="polite"><span id="tMsg"></span><button id="tUndo">Rückgängig</button><i class="tbar"></i></div>
 
@@ -131,8 +169,17 @@ function show(v){const ch=view!=v||$('v'+v).hidden;view=v;
  if(ch){const el=$('v'+v);el.classList.remove('enter');void el.offsetWidth;el.classList.add('enter');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('enter'),1000);if(v=='M')fresh=true}
  if(v=='E'){$('eB').value=String(S.budget).replace('.',',');$('eE').textContent='';arm(null)}}
 $('toSet').onclick=()=>show('E');
+/* Widget-Auswahl */
+const wsh=$('wsh');
+function openW(){const l=eur0(S.budget-spent());$('pv1').textContent=$('pv2').textContent=l;wsh.classList.add('on');wsh.setAttribute('aria-hidden','false')}
+function closeW(){wsh.classList.remove('on');wsh.setAttribute('aria-hidden','true')}
+$('toWid').onclick=openW;$('wshBg').onclick=closeW;$('wshX').onclick=closeW;
+wsh.addEventListener('click',e=>{const o=e.target.closest('.opt');if(!o)return;
+ let ok=false;try{ok=NATIVE&&Android.pinWidget(o.dataset.size)}catch(err){}
+ closeW();
+ setTimeout(()=>toast(ok?'Bestätige jetzt „Hinzufügen“':'Geht hier nicht: lange auf den Startbildschirm drücken → Widgets → Budget'),300)});
 $('back').onclick=()=>{document.activeElement.blur();show('M');render()};
-window.goBack=()=>{if(view=='E'){document.activeElement.blur();show('M');render();return true}return false};
+window.goBack=()=>{if(wsh.classList.contains('on')){closeW();return true}if(view=='E'){document.activeElement.blur();show('M');render();return true}return false};
 $('fab').onclick=()=>{if(NATIVE)Android.openQuickAdd()};
 
 /* Setup */

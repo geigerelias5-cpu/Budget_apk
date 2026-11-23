@@ -1,6 +1,8 @@
 package de.budget.tracker;
 
 import android.app.Activity;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.webkit.JavascriptInterface;
 
@@ -52,6 +54,22 @@ final class Bridge {
             activity.startActivity(i);
             activity.finish();
         });
+    }
+
+    /**
+     * Bittet den Launcher, ein Widget auf den Startbildschirm zu legen.
+     * size: "large" (4×2) oder "small" (4×1). Gibt false zurück, wenn der Launcher das nicht kann.
+     */
+    @JavascriptInterface
+    public boolean pinWidget(String size) {
+        try {
+            AppWidgetManager m = AppWidgetManager.getInstance(activity);
+            if (!m.isRequestPinAppWidgetSupported()) return false;
+            Class<?> cls = "small".equals(size) ? BudgetWidgetSmall.class : BudgetWidget.class;
+            return m.requestPinAppWidget(new ComponentName(activity, cls), null, null);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @JavascriptInterface

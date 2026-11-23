@@ -21,19 +21,25 @@ public class BudgetWidget extends AppWidgetProvider {
 
     @Override
     public void onUpdate(Context context, AppWidgetManager manager, int[] ids) {
-        for (int id : ids) manager.updateAppWidget(id, build(context));
+        for (int id : ids) manager.updateAppWidget(id, build(context, false));
     }
 
+    /** Aktualisiert alle Widgets beider Größen. */
     static void updateAll(Context c) {
         AppWidgetManager m = AppWidgetManager.getInstance(c);
-        int[] ids = m.getAppWidgetIds(new ComponentName(c, BudgetWidget.class));
+        update(c, m, BudgetWidget.class, false);
+        update(c, m, BudgetWidgetSmall.class, true);
+    }
+
+    private static void update(Context c, AppWidgetManager m, Class<?> cls, boolean small) {
+        int[] ids = m.getAppWidgetIds(new ComponentName(c, cls));
         if (ids == null || ids.length == 0) return;
-        RemoteViews v = build(c);
+        RemoteViews v = build(c, small);
         for (int id : ids) m.updateAppWidget(id, v);
     }
 
-    private static RemoteViews build(Context c) {
-        RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget);
+    static RemoteViews build(Context c, boolean small) {
+        RemoteViews v = new RemoteViews(c.getPackageName(), small ? R.layout.widget_small : R.layout.widget);
 
         Double left = Store.remaining(c);
         if (left == null) {
@@ -58,6 +64,8 @@ public class BudgetWidget extends AppWidgetProvider {
         } else {
             v.setOnClickPendingIntent(R.id.w_add, quick(c, "", 200));
         }
+
+        if (small) return v;
 
         for (int i = 0; i < CHIP_IDS.length; i++) {
             String label = "●  " + Store.CAT_NAMES[i];
