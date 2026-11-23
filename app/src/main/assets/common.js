@@ -13,7 +13,7 @@ window.KEY = 'budget-proto-v1';
 window.loadState = function(){
   try{
     const raw = NATIVE ? Android.getData() : localStorage.getItem(KEY);
-    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)) return s; }
+    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)){ window.__SD = Math.min(28, Math.max(1, Math.round(s.startDay || 1))); return s; } }
   }catch(e){}
   return {budget:0, entries:[]};
 };
@@ -32,11 +32,14 @@ window.num = s => {
   const v = parseFloat(s);
   return isFinite(v) ? Math.round(v*100)/100 : NaN;
 };
-window.inMonth = e => { const d=new Date(e.ts), n=new Date(); return d.getMonth()==n.getMonth() && d.getFullYear()==n.getFullYear(); };
+/* Budget-Monat ab Starttag (z. B. 26.): Schlüssel "JJJJ-MM" des Startmonats */
+window.periodKey = t => { const d=new Date(t), D=window.__SD||1; const x = d.getDate()>=D ? d : new Date(d.getFullYear(), d.getMonth()-1, 1);
+  return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0'); };
+window.inMonth = e => periodKey(e.ts) === periodKey(Date.now());
 window.newId = () => Date.now() + '' + Math.random().toString(36).slice(2,6);
 /* Dauerbeträge, die diesen Monat noch nicht als Eintrag angelegt wurden (das macht die App beim Öffnen) */
 window.fixedPending = function(S){
-  const n=new Date(), k=n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0');
+  const k=periodKey(Date.now());
   return (S.fixed||[]).filter(f=>f.from<=k && !(f.skip||[]).includes(k) &&
     !S.entries.some(e=>e.fixed==f.id && inMonth(e))).reduce((a,f)=>a+f.amt,0);
 };

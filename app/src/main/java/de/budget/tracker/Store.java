@@ -139,6 +139,54 @@ final class Store {
         return m == null ? null : new double[]{m.budget, m.spent};
     }
 
+    /** Tag, an dem der Budget-Monat beginnt (1–28), z. B. 26 für Gehalt am 26. */
+    static int startDay(String json) {
+        try {
+            return Math.max(1, Math.min(28, (int) Math.round(new JSONObject(json).optDouble("startDay", 1))));
+        } catch (Exception e) {
+            return 1;
+        }
+    }
+
+    /** Schlüssel "JJJJ-MM" des Budget-Monats, in den der Zeitpunkt fällt. */
+    static String periodKey(long ts, int startDay) {
+        Calendar d = Calendar.getInstance();
+        d.setTimeInMillis(ts);
+        if (d.get(Calendar.DAY_OF_MONTH) < startDay) {
+            d.set(Calendar.DAY_OF_MONTH, 1);
+            d.add(Calendar.MONTH, -1);
+        }
+        return String.format(Locale.ROOT, "%04d-%02d", d.get(Calendar.YEAR), d.get(Calendar.MONTH) + 1);
+    }
+
+    /** Anfang des nächsten Budget-Monats (Mitternacht). */
+    static Calendar periodEnd(String key, int startDay) {
+        Calendar c = Calendar.getInstance();
+        c.clear();
+        c.set(Integer.parseInt(key.substring(0, 4)), Integer.parseInt(key.substring(5, 7)) - 1, startDay);
+        c.add(Calendar.MONTH, 1);
+        return c;
+    }
+
+    /** Verbleibende Tage im laufenden Budget-Monat, heute mitgezählt. */
+    static int daysLeft(Context c) {
+        int sd = startDay(read(c));
+        Calendar end = periodEnd(periodKey(System.currentTimeMillis(), sd), sd);
+        Calendar today = Calendar.getInstance();
+        today.set(Calendar.HOUR_OF_DAY, 0); today.set(Calendar.MINUTE, 0);
+        today.set(Calendar.SECOND, 0); today.set(Calendar.MILLISECOND, 0);
+        long days = Math.round((end.getTimeInMillis() - today.getTimeInMillis()) / 86400000.0);
+        return (int) Math.max(1, days);
+    }
+
+    /** Name des laufenden Budget-Monats (nach der Mitte des Zeitraums), z. B. „Dezember“. */
+    static String periodName(Context c) {
+        int sd = startDay(read(c));
+        Calendar end = periodEnd(periodKey(System.currentTimeMillis(), sd), sd);
+        end.add(Calendar.DAY_OF_MONTH, -15);
+        return new java.text.SimpleDateFormat("MMMM", Locale.GERMANY).format(end.getTime());
+    }
+
     /** Laufender Monat inkl. Dauerbeträgen, die die App noch nicht als Eintrag angelegt hat. */
     static Month month(Context c) {
         try {
@@ -147,17 +195,14 @@ final class Store {
             if (budget <= 0) return null;
             Month m = new Month();
             m.budget = budget;
-            Calendar now = Calendar.getInstance();
-            String ym = String.format(Locale.ROOT, "%04d-%02d", now.get(Calendar.YEAR), now.get(Calendar.MONTH) + 1);
-            Calendar d = Calendar.getInstance();
+            int sd = startDay(o.toString());
+            String ym = periodKey(System.currentTimeMillis(), sd);
             java.util.HashSet<String> fixedSeen = new java.util.HashSet<>();
             JSONArray arr = o.optJSONArray("entries");
             if (arr != null) {
                 for (int i = 0; i < arr.length(); i++) {
                     JSONObject e = arr.getJSONObject(i);
-                    d.setTimeInMillis(e.optLong("ts"));
-                    if (d.get(Calendar.YEAR) != now.get(Calendar.YEAR)
-                            || d.get(Calendar.MONTH) != now.get(Calendar.MONTH)) continue;
+                    if (!ym.equals(periodKey(e.optLong("ts"), sd))) continue;
                     double amt = e.optDouble("amt", 0);
                     m.spent += amt;
                     String fixedId = e.optString("fixed", "");

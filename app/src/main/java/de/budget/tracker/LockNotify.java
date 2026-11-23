@@ -38,7 +38,7 @@ final class LockNotify {
 
         double budget = s[0], spent = s[1], left = budget - spent;
         int pct = (int) Math.max(0, Math.min(100, Math.round(spent / budget * 100)));
-        String month = new SimpleDateFormat("MMMM", Locale.GERMANY).format(new Date());
+        String month = Store.periodName(c);
         String title = left >= 0 ? Store.euro(left) + " übrig" : Store.euro(-left) + " über Budget";
         String text = Store.euro(spent) + " von " + Store.euro(budget) + " ausgegeben · " + month;
 

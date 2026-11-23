@@ -299,6 +299,12 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .perday{text-align:center;margin:-2px 0 10px;font-size:14px;color:var(--mut)}
 .perday b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
 .perday.over b{color:var(--red)}
+.sdrow{display:flex;align-items:center;gap:12px;border:1px solid var(--line);background:var(--card);border-radius:18px;padding:10px 10px 10px 16px}
+.sdrow>span{flex:1}.sdrow b{display:block;font-size:15px}.sdrow small{display:block;color:var(--mut);font-size:12.5px;line-height:1.35}
+.step{display:flex;align-items:center;gap:4px}
+.step button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+.step b.dot{min-width:46px;text-align:center;font-size:24px}
+.mh small.rg{display:block;font-weight:400;font-size:12px;color:var(--mut)}
 [hidden]{display:none!important}
 footer{text-align:center;color:var(--mut);font-size:13px;padding:0 16px 32px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -371,6 +377,9 @@ button:focus{outline:none}
         <div class="field"><input id="eB" inputmode="decimal" aria-label="Monatsbudget in Euro"><span>€</span></div>
         <div class="err" id="eE"></div>
         <button class="pri" id="eSave">Speichern</button>
+        <label>Monatsbeginn</label>
+        <div class="sdrow"><span><b>Neuer Monat ab dem</b><small id="sdHint">z. B. der Tag, an dem dein Gehalt kommt</small></span>
+          <div class="step"><button type="button" id="sdM" aria-label="Früher">−</button><b class="dot" id="sdV">1.</b><button type="button" id="sdP" aria-label="Später">+</button></div></div>
         <label>Daten übertragen</label>
         <p>Sichert alle Einträge, dein Budget und die Dauerbeträge in einer Datei. Auf dem neuen Gerät „Importieren“ tippen und die Datei auswählen.</p>
         <div class="xio"><button class="sec" id="eExp">Exportieren</button><button class="sec" id="eImp">Importieren</button></div>
@@ -378,7 +387,7 @@ button:focus{outline:none}
         <p class="xinfo" id="eAuto" hidden></p>
         <input type="file" id="impFile" accept=".json,application/json,text/plain" hidden>
         <label>Daten</label>
-        <p>Der Monat beginnt automatisch am 1. neu. Alte Einträge bleiben gespeichert.</p>
+        <p>Der Monat beginnt automatisch am <span id="sdTxt">1.</span> neu. Alte Einträge bleiben gespeichert.</p>
         <button class="sec warn" id="eReset">Einträge dieses Monats löschen</button>
         <button class="sec warn" id="eAll">Alles zurücksetzen</button>
       </div>
@@ -461,10 +470,18 @@ S=load();
 const save=()=>{const j=JSON.stringify(S);try{if(NATIVE)Android.setData(j);else localStorage.setItem(KEY,j)}catch(e){}};
 const num=s=>{s=String(s).trim().replace(/\s|€/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const v=parseFloat(s);return isFinite(v)?Math.round(v*100)/100:NaN};
 const now=()=>new Date();
-const inMonth=e=>{const d=new Date(e.ts),n=now();return d.getMonth()==n.getMonth()&&d.getFullYear()==n.getFullYear()};
-const month=()=>S.entries.filter(inMonth);
+/* Budget-Monat: beginnt am Starttag (z. B. Gehalt am 26.) und heißt nach dem Startmonat-Schlüssel "JJJJ-MM" */
+const SD=()=>Math.min(28,Math.max(1,Math.round(S.startDay||1)));
 const ymOf=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-const curYM=()=>ymOf(now());
+const pk=t=>{const d=new Date(t);return d.getDate()>=SD()?ymOf(d):ymOf(new Date(d.getFullYear(),d.getMonth()-1,1))};
+const pStart=k=>{const [y,m]=k.split('-').map(Number);return new Date(y,m-1,SD())};
+const pEnd=k=>{const [y,m]=k.split('-').map(Number);return new Date(y,m,SD())};
+const curYM=()=>pk(now());
+const inMonth=e=>pk(e.ts)==curYM();
+const month=()=>S.entries.filter(inMonth);
+const daysLeft=()=>{const n=now(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.max(1,Math.round((pEnd(curYM())-t)/864e5))};
+const fmtDM=d=>d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
+const pRange=k=>`${fmtDM(pStart(k))} – ${fmtDM(new Date(pEnd(k)-864e5))}`;
 const ymAdd=(k,n)=>{const [y,m]=k.split('-').map(Number);return ymOf(new Date(y,m-1+n,1))};
 const ymDate=k=>{const [y,m]=k.split('-').map(Number);return new Date(y,m-1,1)};
 /* Budget eines Monats: zuletzt gesetzter Wert bis zu diesem Monat */
@@ -515,6 +532,20 @@ $('eExp').onclick=async()=>{const json=backupJSON(),name=backupName(),info=$('eI
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);info.textContent=`Gespeichert: ${name}`}catch(e){info.textContent='Speichern hat nicht geklappt.'}};
 $('eImp').onclick=()=>{$('eInfo').textContent='';if(hasBridge('importData')){Android.importData();return}$('impFile').value='';$('impFile').click()};
 $('sImp').onclick=()=>$('eImp').click();
+/* Monatsbeginn einstellen */
+function sdUI(){$('sdV').textContent=SD()+'.';$('sdTxt').textContent=SD()+'.';$('sdHint').textContent=SD()>1?`Monat läuft vom ${SD()}. bis ${SD()-1}. des Folgemonats`:'z. B. der Tag, an dem dein Gehalt kommt'}
+function sdSet(d){d=Math.min(28,Math.max(1,d));if(d===SD())return;
+ /* Dauerbeträge bleiben in ihrem Monat: an den Anfang des neuen Zeitraums verschieben */
+ const moves=S.entries.filter(e=>e.fixed).map(e=>{const k=pk(e.ts);return [e,(+pStart(k)+ +pEnd(k))/2]});
+ S.startDay=d;
+ const seen=new Set(),drop=new Set(),k0=curYM();
+ for(const [e,mid] of moves){let k=pk(mid);if(k>k0)k=k0;const id=e.fixed+'|'+k;
+  if(seen.has(id)){drop.add(e);continue}seen.add(id);
+  const st=pStart(k);e.ts=new Date(st.getFullYear(),st.getMonth(),st.getDate(),0,1).getTime()}
+ if(drop.size)S.entries=S.entries.filter(e=>!drop.has(e));
+ applyFixed();save();sdUI();fresh=true;render()}
+$('sdM').onclick=()=>sdSet(SD()-1);$('sdP').onclick=()=>sdSet(SD()+1);
+$('toSet').addEventListener('click',sdUI);
 function autoInfo(){if(!hasBridge('lastAutoBackup'))return;let t=0;try{t=Number(Android.lastAutoBackup())}catch(e){}
  $('eAuto').hidden=false;$('eAuto').textContent='Automatische Sicherung: jede Woche in Download/Budget'+(t?` · zuletzt ${new Date(t).toLocaleDateString('de-DE')}`:'')}
 $('toSet').addEventListener('click',autoInfo);
@@ -544,11 +575,11 @@ $('hist').addEventListener('click',e=>{if(e.target.closest('.x'))return;const li
 $('hist').addEventListener('click',e=>{const b=e.target.closest('.x');if(!b)return;const i=S.entries.findIndex(x=>x.id==b.dataset.id);if(i<0)return;
  const li=b.closest('li');li.style.height=li.offsetHeight+'px';void li.offsetWidth;li.classList.add('out');li.style.height='0px';li.style.paddingBlock='0';
  const [r]=S.entries.splice(i,1);let fx=null;
- if(r.fixed){fx=(S.fixed||[]).find(f=>f.id==r.fixed);if(fx){fx.skip=fx.skip||[];fx.skip.push(ymOf(new Date(r.ts)))}}
+ if(r.fixed){fx=(S.fixed||[]).find(f=>f.id==r.fixed);if(fx){fx.skip=fx.skip||[];fx.skip.push(pk(r.ts))}}
  save();
  setTimeout(()=>render(),420);
  const c=ALL.find(c=>c.id==r.cat)||ALL[5];
- toast(`<b>${eur.format(r.amt)}</b> gelöscht`,()=>{if(fx)fx.skip=fx.skip.filter(x=>x!=ymOf(new Date(r.ts)));S.entries.push(r);save();render({newId:r.id})})});
+ toast(`<b>${eur.format(r.amt)}</b> gelöscht`,()=>{if(fx)fx.skip=fx.skip.filter(x=>x!=pk(r.ts));S.entries.push(r);save();render({newId:r.id})})});
 
 /* Ring */
 const RR=40,CC=2*Math.PI*RR;let fresh=true;
@@ -588,13 +619,13 @@ pager.addEventListener('click',e=>{if(justDragged){e.stopPropagation();e.prevent
 
 /* Verlauf */
 function monthsData(){const k0=curYM(),map={};
- for(const e of S.entries){const k=ymOf(new Date(e.ts));(map[k]=map[k]||[]).push(e)}
+ for(const e of S.entries){const k=pk(e.ts);(map[k]=map[k]||[]).push(e)}
  map[k0]=map[k0]||[];
  const keys=Object.keys(map).sort().reverse();
  return keys.map(k=>{const es=map[k],sp=es.reduce((a,e)=>a+e.amt,0),by={};for(const e of es)by[e.cat]=(by[e.cat]||0)+e.amt;
   const fx=es.filter(e=>e.fixed).sort((a,b)=>b.amt-a.amt);
   return {k,cur:k==k0,spent:sp,budget:budgetFor(k),by,n:es.length,fx}})}
-const mName=(k,o={month:'long',year:'numeric'})=>ymDate(k).toLocaleDateString('de-DE',o);
+const mName=(k,o={month:'long',year:'numeric'})=>new Date((+pStart(k)+ +pEnd(k))/2).toLocaleDateString('de-DE',o);
 const mShort=k=>mName(k,{month:'short'}).replace('.','');
 let barTargets=[],chartRows=[];
 /* Tooltip am Diagramm: Maus drüber oder antippen */
@@ -636,7 +667,7 @@ function renderHistory(){const ms=monthsData(),k0=curYM();
   const st=m.cur?(over?`<span class="over">${eur0(-left)} über Budget</span>`:`noch ${eur0(left)} übrig`):(over?`<span class="over">${eur0(-left)} über Budget</span>`:`${eur0(left)} gespart`);
   const det=ALL.map(c=>({...c,v:m.by[c.id]||0})).filter(c=>c.id!='fix'||c.v).sort((a,b)=>b.v-a.v).map(c=>`<li class="${c.v?'':'zero'}"><i style="background:${c.c}"></i><span>${c.n}</span><span>${eur.format(c.v)}</span></li>`
    +(c.id=='fix'?m.fx.map(e=>`<li class="sub"><i></i><span>${esc(e.note||'Dauerbetrag')}</span><span>${eur.format(e.amt)}</span></li>`).join(''):'')).join('');
-  return `<li class="mc${open.has(m.k)?' open':''}" data-k="${m.k}"><button aria-expanded="${open.has(m.k)}"><div class="mh"><b>${mName(m.k)}${m.cur?'<em>läuft</em>':''}</b><span>${eur0(Math.round(m.spent*100)/100)} / ${eur0(m.budget)}</span></div>
+  return `<li class="mc${open.has(m.k)?' open':''}" data-k="${m.k}"><button aria-expanded="${open.has(m.k)}"><div class="mh"><b>${mName(m.k)}${m.cur?'<em>läuft</em>':''}${SD()>1?`<small class="rg">${pRange(m.k)}</small>`:''}</b><span>${eur0(Math.round(m.spent*100)/100)} / ${eur0(m.budget)}</span></div>
    <div class="mbar">${seg}</div><div class="ms">${st}${chev}</div></button>
    <div class="md"><div><ul>${det}</ul><p>${m.n} ${m.n==1?'Eintrag':'Einträge'}</p></div></div></li>`}).join('');
 }
@@ -690,8 +721,8 @@ function applyFixed(){const k0=curYM();let ch=false;S.fixed=S.fixed||[];
  for(const f of S.fixed)if(f.cat!='fix'){f.cat='fix';ch=true}
  for(const e of S.entries)if(e.fixed&&e.cat!='fix'){e.cat='fix';ch=true}
  for(const f of S.fixed){for(let k=f.from;k<=k0;k=ymAdd(k,1)){if((f.skip||[]).includes(k))continue;
-  if(S.entries.some(e=>e.fixed==f.id&&ymOf(new Date(e.ts))==k))continue;
-  const d=ymDate(k);S.entries.push({id:'f'+f.id+k,amt:f.amt,cat:'fix',ts:new Date(d.getFullYear(),d.getMonth(),1,0,1).getTime(),note:f.name,fixed:f.id});ch=true}}
+  if(S.entries.some(e=>e.fixed==f.id&&pk(e.ts)==k))continue;
+  const d=pStart(k);S.entries.push({id:'f'+f.id+k,amt:f.amt,cat:'fix',ts:new Date(d.getFullYear(),d.getMonth(),d.getDate(),0,1).getTime(),note:f.name,fixed:f.id});ch=true}}
  if(ch)save()}
 const fxChev='<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4l6 6-6 6"/></svg>';
 function openD(){renderFixed();$('dq').classList.add('on');$('dq').setAttribute('aria-hidden','false');$('ds').classList.add('on')}
@@ -712,11 +743,11 @@ $('fxAdd').onclick=()=>openF();$('fsX').onclick=closeF;$('fqDim').onclick=closeF
 $('fxl').addEventListener('click',e=>{const b=e.target.closest('[data-f]');if(b)openF(S.fixed.find(f=>f.id==b.dataset.f))});
 $('fsO').onclick=()=>{const name=$('fsN').value.trim(),amt=num(fv);
  if(!name)return shake($('fsN'));if(!(amt>0))return shake($('fsA'));const k0=curYM();
- if(fEdit){Object.assign(fEdit,{name,amt,cat:fCat});for(const e of S.entries)if(e.fixed==fEdit.id&&ymOf(new Date(e.ts))==k0)Object.assign(e,{amt,cat:fCat,note:name})}
+ if(fEdit){Object.assign(fEdit,{name,amt,cat:fCat});for(const e of S.entries)if(e.fixed==fEdit.id&&pk(e.ts)==k0)Object.assign(e,{amt,cat:fCat,note:name})}
  else S.fixed.push({id:Date.now().toString(36),name,amt,cat:fCat,from:k0,skip:[]});
  save();closeF();closeD();render()};
 $('fsD').onclick=()=>{if(!fEdit)return;const f=fEdit,k0=curYM(),oldE=S.entries.slice();
- S.fixed=S.fixed.filter(x=>x!==f);S.entries=S.entries.filter(e=>!(e.fixed==f.id&&ymOf(new Date(e.ts))==k0));save();closeF();render();openD();
+ S.fixed=S.fixed.filter(x=>x!==f);S.entries=S.entries.filter(e=>!(e.fixed==f.id&&pk(e.ts)==k0));save();closeF();render();openD();
  toast(`${esc(f.name)} entfernt`,()=>{S.fixed.push(f);S.entries=oldE;save();render()})};
 /* Nach dem Tippen in Textfelder die Ansicht wieder ausrichten (iPhone/Android verschieben sie sonst) */
 document.addEventListener('focusout',()=>setTimeout(()=>{if(!document.activeElement||document.activeElement===document.body){scrollTo(0,0);document.documentElement.scrollTop=0;document.body.scrollTop=0}},60));
@@ -736,10 +767,10 @@ function render(o={}){
  const tot=spent(),left=S.budget-tot;
  if(!S.budget){if(view!='E')show('S');return}
  if(view=='S')show('M');
- $('mM').textContent=now().toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+ $('mM').textContent=SD()>1?`${mName(curYM(),{month:'long'})} · ${pRange(curYM()).replace(' – ','–')}`:mName(curYM());
  const wasOver=$('mid').classList.contains('over');
  countTo($('mL'),Math.abs(left),eur0);$('mS').textContent=left<0?'über Budget':'übrig von '+eur0(S.budget);
- {const n=now(),dl=new Date(n.getFullYear(),n.getMonth()+1,0).getDate()-n.getDate()+1,pd=left/dl;
+ {const pd=left/daysLeft();
   $('mPd').classList.toggle('over',left<0);
   $('mPd').innerHTML=left<0?'<b>Budget aufgebraucht</b>':`Heute noch <b>${eur.format(Math.floor(pd*100)/100)}</b> pro Tag`}
  $('mid').classList.toggle('over',left<0);

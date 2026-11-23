@@ -84,8 +84,7 @@ public class BudgetWidget extends AppWidgetProvider {
             // Unter dem Plus: was heute noch pro Tag ausgegeben werden kann
             String perDay = "übrig";
             if (left != null) {
-                java.util.Calendar cal = java.util.Calendar.getInstance();
-                int daysLeft = cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH) - cal.get(java.util.Calendar.DAY_OF_MONTH) + 1;
+                int daysLeft = Store.daysLeft(c);
                 perDay = left < 0 ? "über Budget" : Store.euro(Math.floor(left / daysLeft * 100) / 100) + "/Tag";
             }
             v.setTextViewText(R.id.w_month, perDay);
