@@ -203,21 +203,10 @@ final class Bridge {
         });
     }
 
-    /** Öffnet die Dateiauswahl für eine CSV-Datei mit Kontoumsätzen; Ergebnis über window.csvResult(text). */
+    /** Zeitpunkt der letzten automatischen Sicherung (Millisekunden, 0 = noch keine). */
     @JavascriptInterface
-    public void importCsv() {
-        activity.runOnUiThread(() -> {
-            Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-            i.addCategory(Intent.CATEGORY_OPENABLE);
-            i.setType("*/*");
-            i.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{"text/csv", "text/comma-separated-values",
-                    "text/plain", "application/csv", "application/vnd.ms-excel", "application/octet-stream"});
-            try {
-                activity.startActivityForResult(i, MainActivity.REQ_CSV);
-            } catch (Exception e) {
-                // keine Dateiauswahl verfügbar
-            }
-        });
+    public String lastAutoBackup() {
+        return String.valueOf(Store.lastAutoBackup(activity));
     }
 
     @JavascriptInterface

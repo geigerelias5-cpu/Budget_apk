@@ -295,28 +295,10 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .xio{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .xio .sec{margin-top:0;display:flex;align-items:center;justify-content:center;gap:8px}
 .xinfo{font-size:13px!important;margin:8px 2px 0!important;min-height:18px;color:var(--mut);overflow-wrap:anywhere}
-/* CSV-Vorschau */
-.ns.cs{top:max(24px,env(safe-area-inset-top));display:flex;flex-direction:column;padding-bottom:12px}
-.cs .csall{display:flex;gap:6px;margin:-4px 0 8px}
-.cs .csall button{height:34px;padding:0 14px;border-radius:99px;border:1px solid #ffffff24;background:#141414;color:#cfcfcf;font:500 13px "Hanken Grotesk",sans-serif;cursor:pointer}
-.csl{list-style:none;margin:0;padding:0;overflow-y:auto;flex:1;min-height:0;scrollbar-width:none;border-top:1px solid #ffffff17}
-.csl li{border-bottom:1px solid #ffffff17;padding:9px 0}
-.csl .r1{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center}
-.csl .ck{width:24px;height:24px;border-radius:7px;border:1.5px solid #ffffff55;display:grid;place-items:center;cursor:pointer;background:none;padding:0}
-.csl li.on .ck{background:var(--red);border-color:var(--red)}
-.csl li.on .ck::after{content:"";width:10px;height:6px;border:2px solid #fff;border-top:0;border-right:0;rotate:-45deg;translate:0 -1px}
-.csl .tx{overflow:hidden}
-.csl .tx b{display:block;font-weight:500;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.csl .tx small{display:block;font-size:12px;color:#8a8a8a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.csl .am{font-variant-numeric:tabular-nums;font-size:14px;white-space:nowrap;text-align:right}
-.csl .cat1{margin:6px 0 0 38px;height:30px;padding:0 12px;border-radius:99px;border:1px solid #ffffff24;background:#141414;color:#e6e6e6;font:500 12px "Hanken Grotesk",sans-serif;display:inline-flex;align-items:center;gap:7px;cursor:pointer}
-.csl .cat1 i{width:7px;height:7px;border-radius:50%}
-.csl li:not(.on){opacity:.45}
-.csl .flag{color:#f08c90}
-.csl .pick{display:none;flex-wrap:wrap;gap:5px;margin:7px 0 0 38px}
-.csl li.pk .pick{display:flex}
-.csl .pick button{height:30px;padding:0 10px;border-radius:99px;border:1px solid #ffffff24;background:#111;color:#cfcfcf;font:500 12px "Hanken Grotesk",sans-serif;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
-.csl .pick i{width:7px;height:7px;border-radius:50%}
+.hist li:not(.empty){cursor:pointer}
+.perday{text-align:center;margin:-2px 0 10px;font-size:14px;color:var(--mut)}
+.perday b{color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.perday.over b{color:var(--red)}
 [hidden]{display:none!important}
 footer{text-align:center;color:var(--mut);font-size:13px;padding:0 16px 32px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -359,6 +341,7 @@ button:focus{outline:none}
           <div class="btns"><button class="ib" id="toWid" aria-label="Widget &amp; Sperrbildschirm"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><path d="M17.5 14.2v6.6M14.2 17.5h6.6"/></svg></button><button class="ib" id="toSet" aria-label="Einstellungen"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
         <div class="ring"><svg viewBox="0 0 100 100" id="ring"></svg>
           <div class="mid" id="mid"><span class="dot" id="mL">0 €</span><small id="mS">übrig</small></div></div>
+        <p class="perday" id="mPd"></p>
         <div class="sum"><span>Ausgegeben <b id="mSp">0 €</b></span><span>Budget <b id="mB">0 €</b></span></div>
           <button class="fxc" id="fxOpen"><span class="fi">↻</span><span class="ft"><b>Dauerbeträge</b><small id="fxS">Abos &amp; Versicherungen hinzufügen</small></span><span class="fa" id="fxA"></span><svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4l6 6-6 6"/></svg></button>
         <ul class="leg" id="leg"></ul>
@@ -367,7 +350,7 @@ button:focus{outline:none}
         </section>
         <section class="page" id="p2" aria-label="Verlauf">
           <div class="top"><div><h2>Verlauf</h2><p class="mon">Alle Monate im Überblick</p></div></div>
-          <div class="stats"><div class="stat"><small>Ø pro Monat</small><b id="hAvg">–</b></div><div class="stat"><small>Im Budget</small><b id="hOk">–</b></div></div>
+          <div class="stats"><div class="stat"><small>Ø pro Monat</small><b id="hAvg">–</b></div><div class="stat"><small>Gespart</small><b id="hOk">–</b></div></div>
           <div class="chart" id="chart"><div class="plot" id="plot"></div><div class="xl" id="xl"></div><div class="tip" id="tip" hidden></div></div>
           <div class="ckey"><span><i class="s"></i>ausgegeben</span><span><i class="o"></i>drüber</span><span><i></i>Budget</span></div>
           <h3>Monate</h3>
@@ -392,11 +375,7 @@ button:focus{outline:none}
         <p>Sichert alle Einträge, dein Budget und die Dauerbeträge in einer Datei. Auf dem neuen Gerät „Importieren“ tippen und die Datei auswählen.</p>
         <div class="xio"><button class="sec" id="eExp">Exportieren</button><button class="sec" id="eImp">Importieren</button></div>
         <p class="xinfo" id="eInfo" aria-live="polite"></p>
-        <div id="csvBox" hidden>
-          <label>Kontoumsätze</label>
-          <p>CSV-Datei aus dem Online-Banking (z. B. VR-Banking: Umsätze → Exportieren → CSV) einlesen. Nur Abbuchungen werden übernommen.</p>
-          <button class="sec" id="eCsv">Kontoumsätze importieren (CSV)</button>
-        </div>
+        <p class="xinfo" id="eAuto" hidden></p>
         <input type="file" id="impFile" accept=".json,application/json,text/plain" hidden>
         <label>Daten</label>
         <p>Der Monat beginnt automatisch am 1. neu. Alte Einträge bleiben gespeichert.</p>
@@ -408,7 +387,7 @@ button:focus{outline:none}
       <div class="qs" id="qs" aria-hidden="true">
         <div class="dim" id="qsDim"></div>
         <div class="sh" role="dialog" aria-label="Ausgabe eintragen">
-          <div class="hd"><span>Ausgabe eintragen</span><span>übrig <b id="qsL">–</b></span></div>
+          <div class="hd"><span id="qsH">Ausgabe eintragen</span><span>übrig <b id="qsL">–</b></span></div>
           <div class="amtq" id="qsA"><span class="v ph" id="qsV">0,00</span><span class="u">€</span></div>
           <div class="qc" id="qsC" role="group" aria-label="Kategorie"></div>
           <div class="pad" id="qsP"></div>
@@ -456,16 +435,6 @@ button:focus{outline:none}
           <input id="fsN" maxlength="30" placeholder="Name, z. B. Netflix" autocomplete="off" enterkeyhint="done"><button type="button" class="amtq fsamt" id="fsA" aria-label="Betrag pro Monat"><span class="v ph" id="fsV">0,00</span><span class="u">€</span></button><div class="pad" id="fsP"></div>
           <div class="row"><button type="button" class="no" id="fsX">Abbrechen</button><button type="button" class="ok" id="fsO">Speichern</button></div>
           <button type="button" class="del" id="fsD" hidden>Dauerbetrag löschen</button>
-        </div>
-      </div>
-      <div class="qs" id="cq" aria-hidden="true">
-        <div class="dim" id="cqDim"></div>
-        <div class="ns cs" id="cs" role="dialog" aria-label="Kontoumsätze übernehmen">
-          <h4 id="csT">Kontoumsätze</h4>
-          <p id="csSub"></p>
-          <div class="csall"><button type="button" id="csAll">Alle</button><button type="button" id="csNone">Keine</button></div>
-          <ul class="csl" id="csL"></ul>
-          <div class="row"><button type="button" class="no" id="csX">Abbrechen</button><button type="button" class="ok" id="csO">Übernehmen</button></div>
         </div>
       </div>
       <div class="toast" id="toast" role="status" aria-live="polite"><span id="tMsg"></span><button id="tUndo">Rückgängig</button><i class="tbar"></i></div>
@@ -546,6 +515,9 @@ $('eExp').onclick=async()=>{const json=backupJSON(),name=backupName(),info=$('eI
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);info.textContent=`Gespeichert: ${name}`}catch(e){info.textContent='Speichern hat nicht geklappt.'}};
 $('eImp').onclick=()=>{$('eInfo').textContent='';if(hasBridge('importData')){Android.importData();return}$('impFile').value='';$('impFile').click()};
 $('sImp').onclick=()=>$('eImp').click();
+function autoInfo(){if(!hasBridge('lastAutoBackup'))return;let t=0;try{t=Number(Android.lastAutoBackup())}catch(e){}
+ $('eAuto').hidden=false;$('eAuto').textContent='Automatische Sicherung: jede Woche in Download/Budget'+(t?` · zuletzt ${new Date(t).toLocaleDateString('de-DE')}`:'')}
+$('toSet').addEventListener('click',autoInfo);
 $('impFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)f.text().then(applyImport,()=>applyImport(''))};
 window.importResult=txt=>{if(txt)applyImport(txt)};
 function applyImport(txt){let d;
@@ -557,83 +529,6 @@ function applyImport(txt){let d;
  if(S.budget){show('M');render()}else show('S');
  toast('Daten importiert',()=>{S=old;save();if(S.budget){show('M');render()}else show('S')})}
 
-/* ===== CSV-Import (Kontoumsätze) ===== */
-const CSV_RULES=[
- ['transport',/\b(aral|shell|esso|jet|total|totalenergies|agip|eni|omv|avia|orlen|star tankstelle|tankstelle|tank ?&|bft|westfalen|hem\b|q1\b|tankcenter)/i],
- ['einkauf',/\b(rewe|edeka|e center|aldi|lidl|netto|penny|kaufland|norma|globus|v-markt|v markt|marktkauf|real\b|dm[- ]drogerie|dm fil|rossmann|m.ller drogerie|denns|tegut|famila|hit markt|nahkauf|ikea|obi\b|hornbach|bauhaus|toom)/i],
- ['essen',/\b(mcdonald|burger king|kfc|subway|restaurant|ristorante|pizz|lieferando|wolt|uber ?eats|imbiss|b.ckerei|baeckerei|backhaus|cafe|caf.|starbucks|d.ner|doener|kebab|sushi|gastst|wirtshaus|biergarten|mensa|kantine)/i],
- ['freizeit',/\b(kino|cinema|cineplex|netflix|spotify|disney|steam|playstation|xbox|nintendo|eventim|ticket|fitness|mcfit|clever fit|sport|bowling|therme|freibad|museum|dazn|sky deutschland|audible|twitch|youtube)/i],
- ['wohnen',/\b(versicherung|allianz|huk|ergo\b|axa|debeka|generali|devk|lvm|signal iduna|r\+v|ruv|vhv|wgv|cosmos ?direkt|barmenia|gothaer|zurich)/i]];
-function csvSplit(text,del){const rows=[];let row=[],cur='',q=false;
- for(let i=0;i<text.length;i++){const ch=text[i];
-  if(q){if(ch=='"'){if(text[i+1]=='"'){cur+='"';i++}else q=false}else cur+=ch}
-  else if(ch=='"')q=true;else if(ch==del){row.push(cur);cur=''}
-  else if(ch=='\n'||ch=='\r'){if(ch=='\r'&&text[i+1]=='\n')i++;row.push(cur);rows.push(row);row=[];cur=''}else cur+=ch}
- if(cur!==''||row.length){row.push(cur);rows.push(row)}return rows.map(r=>r.map(c=>c.trim()))}
-function csvDate(s){let m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/);if(m){let y=+m[3];if(y<100)y+=2000;return new Date(y,m[2]-1,+m[1],12).getTime()}
- m=s.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return new Date(+m[1],m[2]-1,+m[3],12).getTime();return NaN}
-const normKey=s=>String(s||'').toLowerCase().replace(/[^a-zäöüß0-9 ]/g,' ').replace(/\s+/g,' ').trim().split(' ').slice(0,3).join(' ');
-function parseBankCsv(text){text=text.replace(/^﻿/,'');
- const first=text.split(/\r?\n/).slice(0,40).join('\n');const del=(first.match(/;/g)||[]).length>=(first.match(/,/g)||[]).length?';':',';
- const rows=csvSplit(text,del);
- const hi=rows.findIndex(r=>r.some(c=>/buchungstag|buchungsdatum|^datum$/i.test(c))&&r.some(c=>/betrag|umsatz/i.test(c)));
- if(hi<0)return null;
- const H=rows[hi].map(h=>h.toLowerCase());const col=(...res)=>{for(const re of res){const i=H.findIndex(h=>re.test(h));if(i>=0)return i}return -1};
- const cD=col(/^buchungstag$/,/buchungsdatum/,/^datum$/,/buchungstag/,/valuta/),
-  cA=col(/^betrag( \(eur\))?$/,/^betrag/,/^umsatz$/,/umsatz/),
-  cP=col(/name zahlungsbeteiligter/,/empf.nger\/zahlungspflichtiger/,/zahlungsempf/,/beg.nstigter/,/auftraggeber/,/^name/,/empf.nger/),
-  cV=col(/verwendungszweck/,/vorgang/),cT=col(/buchungstext/);
- let cS=col(/soll.?haben/,/^s\/h$/);
- const data=rows.slice(hi+1).filter(r=>r.length>Math.max(cD,cA)&&r[cD]);
- if(cS<0){/* altes Format: unbenannte Spalte mit S/H */for(let i=0;i<H.length;i++){if(i===cA)continue;const v=data.slice(0,20).map(r=>r[i]);if(v.length&&v.every(x=>x==='S'||x==='H')){cS=i;break}}}
- if(cD<0||cA<0)return null;
- const out=[];
- for(const r of data){const ts=csvDate(r[cD]);let a=num(r[cA]);if(!isFinite(ts)||!isFinite(a)||!a)continue;
-  if(cS>=0){const sh=(r[cS]||'').toUpperCase();a=Math.abs(a)*(sh==='S'?-1:1)}
-  if(a>=0)continue;
-  const payee=(cP>=0?r[cP]:'')||(cT>=0?r[cT]:'')||'Buchung',purpose=cV>=0?r[cV]:'',text2=cT>=0?r[cT]:'';
-  const key=[r[cD],r[cA],payee,purpose].join('|').toLowerCase().replace(/\s+/g,' ');
-  out.push({ts,amt:Math.round(-a*100)/100,payee:payee.replace(/\s+/g,' '),purpose:purpose.replace(/\s+/g,' '),text:text2,key})}
- return out}
-function guessCat(t){const hay=(t.payee+' '+t.purpose).toLowerCase();const learned=(S.csvRules||{})[normKey(t.payee)];if(learned)return learned;
- for(const [c,re] of CSV_RULES)if(re.test(hay))return c;return 'sonst'}
-let csvRows=[];
-function openCsv(list){const have=new Set(S.entries.filter(e=>e.bank).map(e=>e.bank));const fx=(S.fixed||[]);
- csvRows=list.sort((a,b)=>b.ts-a.ts).map(t=>{const dup=have.has(t.key);const isFix=fx.find(f=>{const n=f.name.toLowerCase();return n.length>2&&(t.payee+' '+t.purpose).toLowerCase().includes(n)});
-  return {...t,cat:guessCat(t),on:!dup&&!isFix,dup,fix:isFix?isFix.name:''}});
- const dups=csvRows.filter(r=>r.dup).length;
- const from=csvRows.length?new Date(Math.min(...csvRows.map(r=>r.ts))):null,to=csvRows.length?new Date(Math.max(...csvRows.map(r=>r.ts))):null;
- const f=d=>d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'});
- $('csT').textContent=`${csvRows.length} Abbuchungen gefunden`;
- $('csSub').textContent=csvRows.length?`${f(from)} – ${f(to)}${dups?` · ${dups} schon importiert`:''}. Kategorie antippen zum Ändern.`:'Keine Abbuchungen in der Datei.';
- renderCsv();$('cq').classList.add('on');$('cq').setAttribute('aria-hidden','false');$('cs').classList.add('on')}
-function closeCsv(){$('cs').classList.remove('on');$('cq').classList.remove('on');$('cq').setAttribute('aria-hidden','true')}
-function renderCsv(){const catBy=id=>CATS.find(c=>c.id==id)||CATS[5];
- $('csL').innerHTML=csvRows.map((r,i)=>{const c=catBy(r.cat),d=new Date(r.ts).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
-  const hint=r.dup?' · <span class="flag">schon importiert</span>':r.fix?` · <span class="flag">Dauerbetrag ${esc(r.fix)}?</span>`:'';
-  return `<li data-i="${i}" class="${r.on?'on':''}"><div class="r1"><button type="button" class="ck" aria-label="Übernehmen"></button><div class="tx"><b>${esc(r.payee)}</b><small>${d}${r.purpose?' · '+esc(r.purpose):''}${hint}</small></div><span class="am">${eur.format(r.amt)}</span></div>
-   <button type="button" class="cat1"><i style="background:${c.id=='einkauf'?'#f2f2f2':c.c}"></i>${c.n}</button>
-   <div class="pick">${CATS.map(k=>`<button type="button" data-c="${k.id}"><i style="background:${k.id=='einkauf'?'#f2f2f2':k.c}"></i>${k.n}</button>`).join('')}</div></li>`}).join('');
- const sel=csvRows.filter(r=>r.on);$('csO').textContent=sel.length?`${sel.length} übernehmen · ${eur.format(sel.reduce((a,r)=>a+r.amt,0))}`:'Übernehmen';$('csO').disabled=!sel.length}
-$('csL').addEventListener('click',e=>{const li=e.target.closest('li');if(!li)return;const r=csvRows[+li.dataset.i];
- if(e.target.closest('.ck')){r.on=!r.on;renderCsv();return}
- if(e.target.closest('.cat1')){li.classList.toggle('pk');return}
- const p=e.target.closest('.pick button');if(p){r.cat=p.dataset.c;r.learned=true;r.on=true;renderCsv();return}
- r.on=!r.on;renderCsv()});
-$('csAll').onclick=()=>{csvRows.forEach(r=>{if(!r.dup)r.on=true});renderCsv()};
-$('csNone').onclick=()=>{csvRows.forEach(r=>r.on=false);renderCsv()};
-$('csX').onclick=closeCsv;$('cqDim').onclick=closeCsv;
-$('csO').onclick=()=>{const sel=csvRows.filter(r=>r.on);if(!sel.length)return;
- S.csvRules=S.csvRules||{};for(const r of csvRows)if(r.learned)S.csvRules[normKey(r.payee)]=r.cat;
- const added=sel.map((r,i)=>({id:'b'+Date.now().toString(36)+i,amt:r.amt,cat:r.cat,ts:r.ts,note:r.payee.slice(0,40),bank:r.key}));
- S.entries.push(...added);save();closeCsv();show('M');render();
-};
-window.csvResult=txt=>{const list=txt?parseBankCsv(txt):null;
- if(!list){$('eInfo').textContent='Die Datei konnte nicht als Kontoumsätze gelesen werden (CSV mit Spalten wie Buchungstag und Betrag nötig).';return}
- $('eInfo').textContent='';openCsv(list)};
-$('eCsv').onclick=()=>{$('eInfo').textContent='';if(hasBridge('importCsv'))Android.importCsv()};
-if(hasBridge('importCsv'))$('csvBox').hidden=false;
-
 /* Toast */
 let undoFn=null;
 function toast(msg,undo){const t=$('toast');$('tMsg').innerHTML=msg;undoFn=undo||null;$('tUndo').hidden=!undo;
@@ -641,6 +536,11 @@ function toast(msg,undo){const t=$('toast');$('tMsg').innerHTML=msg;undoFn=undo|
 $('tUndo').onclick=()=>{if(undoFn)undoFn();undoFn=null;$('toast').classList.remove('on')};
 
 /* Eintrag löschen */
+/* Eintrag antippen = bearbeiten */
+$('hist').addEventListener('click',e=>{if(e.target.closest('.x'))return;const li=e.target.closest('li');const x=li&&li.querySelector('.x');if(!x)return;
+ const en=S.entries.find(z=>z.id==x.dataset.id);if(!en)return;
+ if(en.fixed){const f=(S.fixed||[]).find(z=>z.id==en.fixed);if(f)openF(f);return}
+ openQ(en.cat,String(en.amt).replace('.',','),en)});
 $('hist').addEventListener('click',e=>{const b=e.target.closest('.x');if(!b)return;const i=S.entries.findIndex(x=>x.id==b.dataset.id);if(i<0)return;
  const li=b.closest('li');li.style.height=li.offsetHeight+'px';void li.offsetWidth;li.classList.add('out');li.style.height='0px';li.style.paddingBlock='0';
  const [r]=S.entries.splice(i,1);let fx=null;
@@ -716,7 +616,7 @@ const chev='<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="
 function renderHistory(){const ms=monthsData(),k0=curYM();
  const done=ms.filter(m=>!m.cur&&m.n>0);
  const avgBase=done.length?done:ms;$('hAvg').textContent=eur0(Math.round(avgBase.reduce((a,m)=>a+m.spent,0)/avgBase.length));
- $('hOk').textContent=done.length?`${done.filter(m=>m.spent<=m.budget).length} von ${done.length}`:'–';
+ {const sv=done.reduce((a,m)=>a+(m.budget-m.spent),0);$('hOk').textContent=done.length?(sv<0?'−':'')+eur0(Math.round(Math.abs(sv))):'–';$('hOk').style.color=sv<0?'var(--red)':''}
  /* Diagramm: bis zu 6 Monate, ab dem ersten Monat mit Einträgen */
  const first=ms[ms.length-1].k;let keys=[];for(let i=5;i>=0;i--){const k=ymAdd(k0,-i);if(k>=first)keys.push(k)}
  const byK=Object.fromEntries(ms.map(m=>[m.k,m]));
@@ -733,7 +633,7 @@ function renderHistory(){const ms=monthsData(),k0=curYM();
  const open=new Set([...$('mlist').querySelectorAll('.mc.open')].map(x=>x.dataset.k));
  $('mlist').innerHTML=ms.map(m=>{const left=m.budget-m.spent,over=left<0,base=Math.max(m.budget,m.spent)||1;
   const seg=ALL.filter(c=>m.by[c.id]).map(c=>`<i style="width:${m.by[c.id]/base*100}%;background:${c.c}"></i>`).join('');
-  const st=m.cur?(over?`<span class="over">${eur0(-left)} über Budget</span>`:`noch ${eur0(left)} übrig`):(over?`<span class="over">${eur0(-left)} über Budget</span>`:`${eur0(left)} unter Budget`);
+  const st=m.cur?(over?`<span class="over">${eur0(-left)} über Budget</span>`:`noch ${eur0(left)} übrig`):(over?`<span class="over">${eur0(-left)} über Budget</span>`:`${eur0(left)} gespart`);
   const det=ALL.map(c=>({...c,v:m.by[c.id]||0})).filter(c=>c.id!='fix'||c.v).sort((a,b)=>b.v-a.v).map(c=>`<li class="${c.v?'':'zero'}"><i style="background:${c.c}"></i><span>${c.n}</span><span>${eur.format(c.v)}</span></li>`
    +(c.id=='fix'?m.fx.map(e=>`<li class="sub"><i></i><span>${esc(e.note||'Dauerbetrag')}</span><span>${eur.format(e.amt)}</span></li>`).join(''):'')).join('');
   return `<li class="mc${open.has(m.k)?' open':''}" data-k="${m.k}"><button aria-expanded="${open.has(m.k)}"><div class="mh"><b>${mName(m.k)}${m.cur?'<em>läuft</em>':''}</b><span>${eur0(Math.round(m.spent*100)/100)} / ${eur0(m.budget)}</span></div>
@@ -763,7 +663,10 @@ function closeN(){$('ns').classList.remove('on');$('nsI').blur()}
 $('nsO').onclick=()=>{qnote=$('nsI').value.trim();qSel('sonst');closeN()};
 $('nsX').onclick=()=>{closeN();if(!qnote)qSel(null)};
 $('nsI').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('nsO').click()}else if(e.key=='Escape'){e.stopPropagation();$('nsX').click()}});
-function openQ(cat,amount){qv=amount||'';qbusy=false;qnote='';closeN();qSel(cat||null);qUpd();const l=S.budget-spent();$('qsL').textContent=eur0(l);$('qsL').classList.toggle('neg',l<0);
+let qEdit=null;
+function openQ(cat,amount,edit){qEdit=edit||null;qv=amount||'';qbusy=false;qnote='';closeN();qSel(cat||null);
+ if(edit&&cat=='sonst'&&edit.note){qnote=edit.note;qSel('sonst')}
+ $('qsH').textContent=edit?'Ausgabe bearbeiten':'Ausgabe eintragen';qUpd();const l=S.budget-spent();$('qsL').textContent=eur0(l);$('qsL').classList.toggle('neg',l<0);
  $('qsS').classList.remove('ok');$('qsS').textContent='Speichern';$('qs').classList.add('on');$('qs').setAttribute('aria-hidden','false')}
 function closeQ(){$('qs').classList.remove('on');$('qs').setAttribute('aria-hidden','true')}
 $('qsDim').onclick=closeQ;
@@ -773,7 +676,11 @@ $('qsP').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||
  else{const [a,c]=qv.split(',');if(c!==undefined){if(c.length>=2)return;qv+=k}else{if((a||'').length>=6)return;qv=(qv=='0'?'':qv)+k}}qUpd()});
 const shake=el=>{el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')};
 $('qsS').onclick=()=>{if(qbusy)return;const v=num(qv);if(!(v>0))return shake($('qsA'));if(!qcat)return shake($('qsC'));
- qbusy=true;const id=Date.now()+''+Math.random().toString(36).slice(2,6);const en={id,amt:v,cat:qcat,ts:Date.now()};if(qcat=='sonst'&&qnote)en.note=qnote;S.entries.push(en);save();
+ qbusy=true;let id;
+ if(qEdit&&S.entries.includes(qEdit)){const e=qEdit;id=e.id;
+  if(qcat=='sonst'){if(qnote)e.note=qnote;else delete e.note}else if(e.cat=='sonst')delete e.note;
+  e.amt=v;e.cat=qcat;save()}
+ else{id=Date.now()+''+Math.random().toString(36).slice(2,6);const en={id,amt:v,cat:qcat,ts:Date.now()};if(qcat=='sonst'&&qnote)en.note=qnote;S.entries.push(en);save()}
  $('qsS').classList.add('ok');$('qsS').textContent='✓ Gespeichert';
  setTimeout(()=>{closeQ();if(page!=0)goPage(0);render({newId:id})},600)};
 document.addEventListener('keydown',e=>{if(!$('qs').classList.contains('on')||$('ns').classList.contains('on'))return;const m={Backspace:'del',',':',','.':','};const k=m[e.key]||(/^[0-9]$/.test(e.key)?e.key:null);
@@ -832,6 +739,9 @@ function render(o={}){
  $('mM').textContent=now().toLocaleDateString('de-DE',{month:'long',year:'numeric'});
  const wasOver=$('mid').classList.contains('over');
  countTo($('mL'),Math.abs(left),eur0);$('mS').textContent=left<0?'über Budget':'übrig von '+eur0(S.budget);
+ {const n=now(),dl=new Date(n.getFullYear(),n.getMonth()+1,0).getDate()-n.getDate()+1,pd=left/dl;
+  $('mPd').classList.toggle('over',left<0);
+  $('mPd').innerHTML=left<0?'<b>Budget aufgebraucht</b>':`Heute noch <b>${eur.format(Math.floor(pd*100)/100)}</b> pro Tag`}
  $('mid').classList.toggle('over',left<0);
  if(wasOver!=(left<0)||o.newId){const m=$('mid');m.classList.remove('bump');void m.offsetWidth;m.classList.add('bump')}
  countTo($('mSp'),tot,v=>eur.format(v));$('mB').textContent=eur0(S.budget);

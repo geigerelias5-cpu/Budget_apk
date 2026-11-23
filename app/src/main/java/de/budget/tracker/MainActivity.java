@@ -8,7 +8,6 @@ import android.webkit.WebView;
 public class MainActivity extends Activity {
     static final int REQ_NOTIFY = 7;
     static final int REQ_IMPORT = 8;
-    static final int REQ_CSV = 9;
     private WebView web;
     private boolean firstResume = true;
 
@@ -25,8 +24,7 @@ public class MainActivity extends Activity {
     @SuppressWarnings("deprecation")
     protected void onActivityResult(int requestCode, int resultCode, android.content.Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if ((requestCode != REQ_IMPORT && requestCode != REQ_CSV) || resultCode != RESULT_OK
-                || data == null || data.getData() == null) return;
+        if (requestCode != REQ_IMPORT || resultCode != RESULT_OK || data == null || data.getData() == null) return;
         String text = "";
         try (java.io.InputStream in = getContentResolver().openInputStream(data.getData())) {
             if (in != null) {
@@ -38,11 +36,10 @@ public class MainActivity extends Activity {
             }
         } catch (Exception ignored) {
         }
-        String fn = requestCode == REQ_CSV ? "csvResult" : "importResult";
-        web.evaluateJavascript("window." + fn + " && " + fn + "(" + org.json.JSONObject.quote(text) + ")", null);
+        web.evaluateJavascript("window.importResult && importResult(" + org.json.JSONObject.quote(text) + ")", null);
     }
 
-    /** Text als UTF-8 lesen; Bank-CSVs sind oft Windows-1252 (Umlaute), dann darauf ausweichen. */
+    /** Text als UTF-8 lesen; falls ungültig, als Windows-1252 (ältere Dateien mit Umlauten). */
     private static String decode(byte[] bytes) {
         try {
             return java.nio.charset.StandardCharsets.UTF_8.newDecoder()

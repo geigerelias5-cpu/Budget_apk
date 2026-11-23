@@ -81,7 +81,14 @@ public class BudgetWidget extends AppWidgetProvider {
             v.setProgressBar(over ? R.id.w_bar_red : R.id.w_bar, 100, pct, false);
         }
         if (type == RING) {
-            v.setTextViewText(R.id.w_month, left != null && left < 0 ? "über Budget" : "übrig");
+            // Unter dem Plus: was heute noch pro Tag ausgegeben werden kann
+            String perDay = "übrig";
+            if (left != null) {
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                int daysLeft = cal.getActualMaximum(java.util.Calendar.DAY_OF_MONTH) - cal.get(java.util.Calendar.DAY_OF_MONTH) + 1;
+                perDay = left < 0 ? "über Budget" : Store.euro(Math.floor(left / daysLeft * 100) / 100) + "/Tag";
+            }
+            v.setTextViewText(R.id.w_month, perDay);
             // Glatte Beträge (ohne Cent) sind kürzer und dürfen größer sein
             boolean whole = left != null && Math.round(Math.abs(left) * 100) % 100 == 0;
             v.setTextViewTextSize(R.id.w_left, android.util.TypedValue.COMPLEX_UNIT_SP, whole ? 21f : 16f);

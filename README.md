@@ -14,7 +14,9 @@ iPhone? → [Web-App für iPhone](https://geigerelias5-cpu.github.io/Budget-web/
 - **Dauerbeträge** für Abos und Versicherungen, zählen jeden Monat automatisch
 - **Budget als Nachricht** auf dem Sperrbildschirm und eine Schnellzugriff-Kachel
 - **Export & Import**: Sicherungsdatei zum Umziehen auf ein anderes Gerät (auch Android ↔ iPhone)
-- **Kontoumsätze importieren**: CSV-Datei aus dem Online-Banking (z. B. VR-Banking) einlesen, Abbuchungen werden automatisch Kategorien zugeordnet
+- **Automatische Sicherung** jede Woche in Download/Budget
+- **Einträge bearbeiten** (antippen) und **„Heute noch X € pro Tag“**
+- **Gespart**: was am Monatsende übrig bleibt, zählt im Verlauf als gespart
 
 ## Installieren
 

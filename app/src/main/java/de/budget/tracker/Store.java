@@ -44,9 +44,70 @@ final class Store {
 
     /** Widgets, Sperrbildschirm-Anzeige und Kachel auf den neuesten Stand bringen. */
     static void refreshAll(Context c) {
+        autoBackup(c);
         BudgetWidget.updateAll(c);
         LockNotify.update(c);
         AddTile.refresh(c);
+    }
+
+    static long lastAutoBackup(Context c) {
+        return prefs(c).getLong("lastAuto", 0);
+    }
+
+    /**
+     * Automatische Sicherung: höchstens einmal pro Woche eine Datei
+     * „Budget-Auto-Sicherung.json“ in Download/Budget (wird überschrieben) plus Kopie in der App.
+     */
+    static void autoBackup(Context c) {
+        long now = System.currentTimeMillis();
+        if (now - lastAutoBackup(c) < 7L * 24 * 60 * 60 * 1000) return;
+        try {
+            JSONObject state = new JSONObject(read(c));
+            if (state.optDouble("budget", 0) <= 0) return;
+            java.text.SimpleDateFormat iso = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT);
+            iso.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            String json = new JSONObject().put("app", "budget").put("format", 1)
+                    .put("exported", iso.format(new java.util.Date(now))).put("auto", true)
+                    .put("data", state).toString(1);
+            byte[] bytes = json.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            String name = "Budget-Auto-Sicherung.json";
+
+            // Kopie in der App
+            java.io.File dir = new java.io.File(c.getFilesDir(), "sicherungen");
+            if (!dir.exists()) dir.mkdirs();
+            try (java.io.FileOutputStream out = new java.io.FileOutputStream(new java.io.File(dir, name))) {
+                out.write(bytes);
+            }
+
+            // Sichtbare Datei in Download/Budget: vorhandene überschreiben, sonst neu anlegen
+            android.content.ContentResolver cr = c.getContentResolver();
+            android.net.Uri coll = android.provider.MediaStore.Downloads.EXTERNAL_CONTENT_URI;
+            android.net.Uri uri = null;
+            try (android.database.Cursor cur = cr.query(coll,
+                    new String[]{android.provider.MediaStore.MediaColumns._ID},
+                    android.provider.MediaStore.MediaColumns.DISPLAY_NAME + "=? AND "
+                            + android.provider.MediaStore.MediaColumns.RELATIVE_PATH + "=?",
+                    new String[]{name, "Download/Budget/"}, null)) {
+                if (cur != null && cur.moveToFirst())
+                    uri = android.content.ContentUris.withAppendedId(coll, cur.getLong(0));
+            } catch (Exception ignored) {
+            }
+            if (uri == null) {
+                android.content.ContentValues v = new android.content.ContentValues();
+                v.put(android.provider.MediaStore.MediaColumns.DISPLAY_NAME, name);
+                v.put(android.provider.MediaStore.MediaColumns.MIME_TYPE, "application/json");
+                v.put(android.provider.MediaStore.MediaColumns.RELATIVE_PATH, "Download/Budget");
+                uri = cr.insert(coll, v);
+            }
+            if (uri != null) {
+                try (java.io.OutputStream out = cr.openOutputStream(uri, "wt")) {
+                    if (out != null) out.write(bytes);
+                }
+            }
+            prefs(c).edit().putLong("lastAuto", now).apply();
+        } catch (Exception ignored) {
+            // Sicherung ist Komfort – Fehler dürfen die App nicht stören
+        }
     }
 
     static boolean askedNotify(Context c) {
