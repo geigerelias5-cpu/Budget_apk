@@ -69,8 +69,7 @@ public class BudgetWidget extends AppWidgetProvider {
             v.setTextViewText(R.id.w_left, narrow ? "–" : "Budget festlegen");
             v.setTextColor(R.id.w_left, 0xFFF2F2F2);
         } else {
-            // Schmale Widgets zeigen ganze Euro, damit Betrag und Plus nebeneinander passen
-            v.setTextViewText(R.id.w_left, narrow ? Store.euro(Math.round(left)) : Store.euro(left));
+            v.setTextViewText(R.id.w_left, Store.euro(left));
             v.setTextColor(R.id.w_left, left < 0 ? 0xFFD71921 : 0xFFF2F2F2);
         }
 

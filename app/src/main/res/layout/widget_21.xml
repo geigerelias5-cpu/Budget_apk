@@ -40,7 +40,7 @@
                 android:maxLines="1"
                 android:text="–"
                 android:textColor="#F2F2F2"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
         </LinearLayout>
 
