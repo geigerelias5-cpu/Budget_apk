@@ -88,7 +88,7 @@ h3{font-size:14px;color:var(--mut);font-weight:500;margin:18px 0 4px}
 .setup{justify-content:center;text-align:center}
 .setup h2{font-size:30px;line-height:1.05;margin:0 0 8px}
 .setup p,.set p{color:var(--mut);margin:0 0 18px;font-size:15px}
-.field{display:flex;align-items:center;gap:12px;border:2px solid var(--ink);border-radius:20px;padding:4px 16px;background:var(--card)}
+.field{display:flex;align-items:center;gap:4px;border:2px solid var(--ink);border-radius:20px;padding:4px 16px;background:var(--card)}
 .field input{flex:1;border:0;background:none;color:var(--ink);font:900 38px Doto,monospace;padding:8px 0;width:100%}
 .field input:focus{outline:none}
 .field span{font:900 30px Doto,monospace;color:var(--mut)}
@@ -130,14 +130,14 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .w22 .arc2{transition:stroke-dasharray .9s cubic-bezier(.2,.9,.2,1),stroke-dashoffset .9s cubic-bezier(.2,.9,.2,1)}
 .w22o{position:absolute;inset:0;border-radius:50%;border:0;background:none;cursor:pointer}
 .w22c{position:absolute;inset:0;padding-bottom:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
-.w22c b{margin-bottom:5px;font:900 12px/1.1 Doto,monospace;color:#f2f2f2;white-space:nowrap;transition:color .3s}.w22c b.neg{color:var(--red)}
+.w22c b{margin-bottom:5px;font:900 15px/1.1 Doto,monospace;color:#f2f2f2;white-space:nowrap;transition:color .3s}.w22c b.neg{color:var(--red)}
 .w22c small{font-size:9px;color:#8a8a8a;letter-spacing:.04em;margin-top:5px}
 .w22p{pointer-events:auto;width:32px;height:32px;border-radius:50%;border:0;background:var(--red);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 16px -6px #d71921cc}
 .w22s{display:block;height:31px}
 .w21{margin:0;width:100%;background:#000;color:#f2f2f2;border:1px solid #ffffff17;border-radius:22px;padding:9px 9px 12px 14px;display:block;box-shadow:0 16px 30px -16px #000}
 .w21 .tr{margin-right:5px}
 .w21 small{display:block;font-size:11px;color:#8a8a8a;line-height:1.2}
-.w21 b{display:block;font:900 16px/1.15 Doto,monospace;margin:2px 0 0;white-space:nowrap;transition:color .3s}
+.w21 b{display:block;font:900 19px/1.15 Doto,monospace;margin:2px 0 0;white-space:nowrap;transition:color .3s}
 .w21r{display:flex;align-items:center;gap:6px;margin-bottom:8px}
 .w21o{flex:1;border:0;background:none;color:inherit;padding:0;text-align:left;font:inherit;cursor:pointer;min-height:40px}
 .w21p{flex:none;width:36px;height:36px;border-radius:50%;border:0;background:var(--red);display:grid;place-items:center;cursor:pointer}
@@ -209,7 +209,7 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .qs.on{pointer-events:auto}.qs.on .dim{opacity:.5}.qs.on .sh{transform:none}
 .qs .hd{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:#8a8a8a;padding:0 4px}
 .qs .hd b{font:900 16px Doto,monospace;color:#f2f2f2}.qs .hd b.neg{color:var(--red)}
-.qs .amtq{display:flex;justify-content:flex-end;align-items:baseline;gap:11px;padding:6px 6px 4px;height:62px;overflow:hidden}
+.qs .amtq{display:flex;justify-content:flex-end;align-items:baseline;gap:2px;padding:6px 6px 4px;height:62px;overflow:hidden}
 .qs .amtq .v{font:900 44px/1 Doto,monospace;white-space:nowrap}.qs .amtq .v.ph{color:#3a3a3a}
 .qs .amtq .u{font:900 26px Doto,monospace;color:#555}
 .qs .qc{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:4px 0 10px}
@@ -426,9 +426,9 @@ const CATS=[
  {id:'sonst',n:'Sonstiges',c:'#c4c4bf'}];
 const FIXCAT={id:'fix',n:'Dauerbeträge',c:'#8c1016'},ALL=[...CATS,FIXCAT];
 const KEY='budget-proto-v1',$=id=>document.getElementById(id);
-/* Betrag mit etwas mehr Abstand vor dem €-Zeichen */
+/* €-Zeichen eng an die Zahl */
 const _eur=new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'});
-const eur={format:v=>_eur.format(v).replace(/\s€$/,'\u00A0\u202F€')};
+const eur={format:v=>_eur.format(v).replace(/\s€$/,'\u202F€')};
 const eur0=v=>eur.format(v).replace(/,00(?=\s)/,'');
 let S={budget:0,entries:[],budgets:{},fixed:[]},sel=null,lastDel=null,tt;
 const NATIVE=typeof window.Android!=='undefined';

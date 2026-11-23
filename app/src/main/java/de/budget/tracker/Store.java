@@ -136,7 +136,7 @@ final class Store {
         NumberFormat f = NumberFormat.getCurrencyInstance(Locale.GERMANY);
         String s = f.format(v).replace('\u202F', ' ').replace('\u00A0', ' ');
         s = s.replace(",00 ", " ");
-        // etwas mehr Abstand vor dem €-Zeichen (geschützte Leerzeichen, damit nichts umbricht)
-        return s.replace(" €", "\u00A0\u202F€");
+        // €-Zeichen eng an die Zahl (schmales geschütztes Leerzeichen)
+        return s.replace(" €", "\u202F€");
     }
 }
