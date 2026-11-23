@@ -1,40 +1,33 @@
-# Budget: Android-App mit Homescreen-Widget
+# Budget – einfacher Budget-Tracker für Android
 
-Eine einfache Budget-App für dein Nothing Phone (Android 10 oder neuer).
+Ausgaben schnell eintragen, sehen was vom Monatsbudget übrig ist. Ohne Konto, ohne Werbung, ohne Internet – alle Daten bleiben auf deinem Handy.
 
-- **Widget** (4×2): zeigt, was diesen Monat noch übrig ist. Tippst du auf eine Kategorie oder auf **+**, öffnet sich über dem Startbildschirm ein kleines Fenster mit Ziffernblock.
-- **App**: Kreisdiagramm nach Kategorien, Restbetrag, letzte Einträge (löschen mit Rückgängig), Einstellungen fürs Budget.
-- Alle Daten bleiben nur auf dem Handy, es gibt keinen Internetzugriff.
+**[⬇ Budget.apk herunterladen (neueste Version)](https://github.com/geigerelias5-cpu/Budget_apk/releases/latest/download/Budget.apk)**
 
-## APK bauen: Weg A, GitHub (ohne Installation)
+iPhone? → [Web-App für iPhone](https://geigerelias5-cpu.github.io/Budget-web/)
 
-1. Lege auf github.com ein Konto an und erstelle ein neues Repository, z. B. `budget-app` (privat ist ok).
-2. Lade den **gesamten Inhalt** dieses Ordners hoch. Am einfachsten geht das mit **GitHub Desktop** (Repository klonen, Dateien hineinkopieren, „Commit“ und „Push“).
-   - Wichtig: Der versteckte Ordner `.github` muss mit. Beim Hochladen über den Browser wird er manchmal weggelassen. Dann im Repository auf **Actions → „set up a workflow yourself“** gehen, den Inhalt von `.github/workflows/build.yml` einfügen und speichern.
-3. Unter **Actions** startet der Build automatisch (ca. 3–5 Minuten). Wenn er grün ist, klickst du auf den Lauf und lädst unten unter „Artifacts“ **Budget-APK** herunter. Das ist eine ZIP-Datei, darin liegt `Budget.apk`.
+## Funktionen
 
-## APK bauen: Weg B, Android Studio
+- **Kreisdiagramm** mit Restbetrag und Ausgaben nach Kategorie (Essen, Einkauf, Sprit, Freizeit, Versicherung, Sonstiges)
+- **Widgets** für den Startbildschirm in vier Größen (2×1, 2×2 rund, 4×1, 4×2) – mit „+“ zum schnellen Eintragen
+- **Verlauf**: alle Monate mit Diagramm, im Budget geblieben oder drüber
+- **Dauerbeträge** für Abos und Versicherungen, zählen jeden Monat automatisch
+- **Budget als Nachricht** auf dem Sperrbildschirm und eine Schnellzugriff-Kachel
+- **Export & Import**: Sicherungsdatei zum Umziehen auf ein anderes Gerät (auch Android ↔ iPhone)
 
-Öffne den Ordner in Android Studio, warte, bis Gradle fertig ist, und wähle dann **Build → Build App Bundle(s) / APK(s) → Build APK(s)**.
+## Installieren
 
-## Installieren auf dem Handy
+1. Auf dem Android-Handy (Android 10 oder neuer) den Link oben öffnen, `Budget.apk` wird heruntergeladen.
+2. Datei antippen → einmalig **„Unbekannte Apps installieren“** für den Browser bzw. die Dateien-App erlauben → **Installieren**.
+3. Falls Google Play Protect warnt („Unbekannter Entwickler“): **Trotzdem installieren** – die App ist nicht im Play Store, deshalb die Warnung.
+4. Widget hinzufügen: in der App auf den Widget-Knopf oben rechts tippen, oder lange auf den Startbildschirm drücken → Widgets → Budget.
 
-1. Kopiere `Budget.apk` aufs Handy und tippe sie an.
-2. Erlaube einmalig „Unbekannte Apps installieren“ für die App, mit der du die Datei öffnest (z. B. Dateien oder Chrome).
-3. Widget hinzufügen: lange auf den Startbildschirm drücken → **Widgets** → **Budget**.
+Updates: neue `Budget.apk` einfach über die alte installieren, die Daten bleiben erhalten.
 
-## Updates
+## Datenschutz
 
-Das Projekt signiert mit einem festen Schlüssel (`app/budget.keystore`). Neue Versionen kannst du deshalb einfach über die alte App installieren, deine Daten bleiben erhalten. Erhöhe dafür in `app/build.gradle` die Zahl bei `versionCode`.
+Die App hat keinen Internetzugriff und sammelt keine Daten. Alles wird nur lokal auf dem Gerät gespeichert. Sicherungsdateien entstehen nur, wenn du selbst auf „Exportieren“ tippst.
 
-## Wo was liegt
+## Selbst bauen
 
-| Datei | Inhalt |
-|---|---|
-| `app/src/main/assets/index.html` | Oberfläche der App (Diagramm, Liste, Einstellungen) |
-| `app/src/main/assets/quick.html` | Schnelleingabe-Fenster mit Ziffernblock |
-| `app/src/main/assets/common.js` | Kategorien und Speichern |
-| `app/src/main/java/.../BudgetWidget.java` | Homescreen-Widget |
-| `app/src/main/res/layout/widget.xml` | Aussehen des Widgets |
-
-Die Kategorien änderst du in `common.js` **und** in `Store.java` (gleiche Reihenfolge).
+Das Projekt baut automatisch per GitHub Actions (`.github/workflows/build.yml`). Für eigene Builds brauchst du einen eigenen Signier-Schlüssel; das Passwort wird über das Secret `BUDGET_KEY_PASSWORD` gesetzt.

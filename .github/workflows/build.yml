@@ -21,6 +21,8 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: APK kompilieren
+        env:
+          BUDGET_KEY_PASSWORD: ${{ secrets.BUDGET_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
@@ -37,7 +39,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "build-${{ github.run_number }}" Budget.apk \
-            --title "Budget App (Build ${{ github.run_number }})" \
-            --notes "Auf dem Handy Budget.apk antippen und installieren." \
+          VERSION=$(grep -oP "versionName '\\K[^']+" app/build.gradle)
+          gh release create "v${VERSION}-${{ github.run_number }}" Budget.apk \
+            --title "Budget ${VERSION}" \
+            --notes "**Installieren:** Budget.apk auf dem Android-Handy herunterladen, antippen und „Installieren“ wählen (einmalig „Unbekannte Apps installieren“ erlauben). Android 10 oder neuer." \
             --latest

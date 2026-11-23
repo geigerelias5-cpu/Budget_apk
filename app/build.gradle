@@ -10,18 +10,24 @@ android {
         applicationId 'de.budget.tracker'
         minSdk 29
         targetSdk 34
-        versionCode 17
+        versionCode 18
         versionName '2.6'
     }
 
     signingConfigs {
-        // Fester Schlüssel im Projekt: so kannst du spätere Versionen als Update
-        // installieren, ohne die App (und deine Daten) vorher zu löschen.
+        // Schlüsseldatei liegt im Projekt, das Passwort NUR als GitHub-Secret „BUDGET_KEY_PASSWORD“.
+        // So kann niemand mit dem öffentlichen Code gefälschte Updates signieren.
         budget {
-            storeFile file('budget.keystore')
-            storePassword 'budget123'
+            storeFile file('budget-release.p12')
+            storePassword System.getenv('BUDGET_KEY_PASSWORD') ?: ''
             keyAlias 'budget'
-            keyPassword 'budget123'
+            keyPassword System.getenv('BUDGET_KEY_PASSWORD') ?: ''
+        }
+    }
+
+    gradle.taskGraph.whenReady { graph ->
+        if (graph.allTasks.any { it.name.toLowerCase().contains('release') } && !System.getenv('BUDGET_KEY_PASSWORD')) {
+            throw new GradleException('Das Secret BUDGET_KEY_PASSWORD fehlt (GitHub: Settings → Secrets and variables → Actions).')
         }
     }
 
