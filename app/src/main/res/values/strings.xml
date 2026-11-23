@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Budget</string>
+    <string name="widget_desc">Ausgabe schnell eintragen und sehen, was vom Budget übrig ist</string>
+    <string name="widget_left_label">übrig diesen Monat</string>
+</resources>

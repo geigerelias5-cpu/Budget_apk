@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Ausgabe eintragen</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+:root{--red:#d71921;color-scheme:dark}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:transparent;color:#f2f2f2;font:16px/1.5 Hanken,system-ui,sans-serif;overflow:hidden;user-select:none}
+.dim{position:fixed;inset:0;background:#000;opacity:0;transition:opacity .35s}
+.open .dim{opacity:.5}
+.sheet{position:fixed;left:10px;right:10px;bottom:10px;background:#000;border:1px solid #ffffff17;border-radius:30px;padding:16px 16px 14px;
+ transform:translateY(110%);transition:transform .45s cubic-bezier(.2,.9,.2,1);box-shadow:0 -10px 50px -10px #000}
+.open .sheet{transform:none}
+.hd{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:#8a8a8a;padding:0 4px}
+.hd b{font:900 17px Doto,monospace;color:#f2f2f2;transition:color .3s}
+.hd b.neg{color:var(--red)}
+.amt{display:flex;justify-content:flex-end;align-items:baseline;gap:8px;padding:10px 6px 6px;height:76px;overflow:hidden}
+.amt .v{font:900 52px/1 Doto,monospace;white-space:nowrap}
+.amt .v.ph{color:#3a3a3a}
+.amt .u{font:900 30px Doto,monospace;color:#555}
+.amt.shake{animation:shake .35s}
+.cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:6px 0 12px}
+.cats.shake{animation:shake .35s}
+.cat{border:1px solid #ffffff1c;background:#111;border-radius:99px;height:40px;font:500 13px Hanken,sans-serif;color:#cfcfcf;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .2s,color .2s,border-color .2s,transform .15s}
+.cat i{width:7px;height:7px;border-radius:50%;flex:none}
+.cat[aria-pressed=true]{background:#f2f2f2;color:#000;border-color:#f2f2f2}
+.pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pad button{height:56px;border:0;border-radius:18px;background:#141414;color:#f2f2f2;font:900 26px Doto,monospace;transition:background .15s,transform .12s}
+.pad button:active{background:#262626;transform:scale(.95)}
+.pad .del{font:500 20px Hanken,sans-serif;color:#9a9a9a}
+.row{display:flex;gap:8px;margin-top:10px}
+.go{flex:1;height:56px;border:0;border-radius:18px;background:var(--red);color:#fff;font:700 16px Hanken,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .25s,transform .15s}
+.go:disabled{background:#1e1e1e;color:#555}
+.go.ok{background:#f2f2f2;color:#000}
+.app{width:56px;height:56px;border:1px solid #ffffff1c;border-radius:18px;background:none;color:#cfcfcf;display:grid;place-items:center;transition:transform .15s}
+.app:active,.go:active:not(:disabled){transform:scale(.95)}
+.nob{text-align:center;padding:10px 6px 4px}
+.nob p{color:#9a9a9a;margin:6px 0 14px}
+.nob .go{width:100%}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes popIn{from{transform:scale(.6);opacity:0}}
+.amt .v.bump{animation:popIn .18s ease-out}
+button:focus{outline:none}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="dim" id="dim"></div>
+<div class="sheet" id="sheet" role="dialog" aria-label="Ausgabe eintragen">
+  <div id="form">
+    <div class="hd"><span>Ausgabe eintragen</span><span>übrig <b id="left">–</b></span></div>
+    <div class="amt" id="amt"><span class="v ph" id="val">0,00</span><span class="u">€</span></div>
+    <div class="cats" id="cats" role="group" aria-label="Kategorie"></div>
+    <div class="pad" id="pad"></div>
+    <div class="row">
+      <button class="app" id="app" aria-label="App öffnen"><svg width="22" height="22" viewBox="0 0 26 26"><circle cx="13" cy="13" r="9" fill="none" stroke="#cfcfcf" stroke-width="3.5" stroke-dasharray="38 19"/><circle cx="13" cy="13" r="9" fill="none" stroke="#d71921" stroke-width="3.5" stroke-dasharray="0 38 19 0"/></svg></button>
+      <button class="go" id="go" disabled><span id="goT">Speichern</span></button>
+    </div>
+  </div>
+  <div class="nob" id="nob" hidden>
+    <b>Noch kein Budget</b>
+    <p>Lege zuerst in der App dein Monatsbudget fest.</p>
+    <button class="go" id="nobGo">App öffnen</button>
+  </div>
+</div>
+
+<script src="common.js"></script>
+<script>
+{
+const $=id=>document.getElementById(id);
+let S,s='',sel=null,busy=false;
+
+$('cats').innerHTML=CATS.map(c=>`<button class="cat" data-c="${c.id}" aria-pressed="false"><i style="background:${c.w||c.c}"></i>${c.n}</button>`).join('');
+$('pad').innerHTML=['1','2','3','4','5','6','7','8','9',',','0','del'].map(k=>k=='del'
+ ?`<button class="del" data-k="del" aria-label="Löschen">⌫</button>`:`<button data-k="${k}">${k}</button>`).join('');
+
+function selectCat(id){sel=id||null;for(const b of $('cats').children)b.setAttribute('aria-pressed',b.dataset.c==sel)}
+function upd(bump){const v=$('val');
+ if(!s){v.textContent='0,00';v.classList.add('ph')}else{v.classList.remove('ph');
+  const [a,b]=s.split(',');v.textContent=Number(a||'0').toLocaleString('de-DE')+(b!==undefined?','+b:'')}
+ if(bump){v.classList.remove('bump');void v.offsetWidth;v.classList.add('bump')}
+ $('go').disabled=!(num(s)>0)}
+function leftNow(){const tot=S.entries.filter(inMonth).reduce((a,e)=>a+e.amt,0);return S.budget-tot}
+function showLeft(){const l=leftNow(),b=$('left');b.textContent=eur0(l);b.classList.toggle('neg',l<0)}
+
+$('cats').addEventListener('click',e=>{const b=e.target.closest('.cat');if(b)selectCat(b.dataset.c)});
+$('pad').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||busy)return;const k=b.dataset.k;
+ if(k=='del')s=s.slice(0,-1);
+ else if(k==','){if(!s.includes(','))s=(s||'0')+','}
+ else{const [a,c]=s.split(',');
+  if(c!==undefined){if(c.length>=2)return;s+=k}
+  else{if((a||'').length>=6)return;s=(s=='0'?'':s)+k}}
+ upd(true)});
+
+function shake(id){const el=$(id);el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')}
+$('go').onclick=()=>{if(busy)return;const v=num(s);if(!(v>0))return shake('amt');if(!sel)return shake('cats');
+ busy=true;S=loadState();S.entries.push({id:newId(),amt:v,cat:sel,ts:Date.now()});saveState(S);showLeft();
+ $('go').classList.add('ok');$('goT').textContent='✓ Gespeichert';
+ setTimeout(()=>dismiss(),650)};
+
+$('app').onclick=()=>{if(NATIVE)Android.openApp()};
+$('nobGo').onclick=()=>{if(NATIVE)Android.openApp()};
+$('dim').onclick=()=>dismiss();
+
+window.dismiss=()=>{document.body.classList.remove('open');setTimeout(()=>{if(NATIVE)Android.close()},380);return true};
+window.reopen=()=>{S=loadState();s='';busy=false;
+ $('go').classList.remove('ok');$('goT').textContent='Speichern';
+ const has=S.budget>0;$('form').hidden=!has;$('nob').hidden=has;
+ selectCat(NATIVE?Android.startCategory():'');upd(false);if(has)showLeft();
+ document.body.classList.remove('open');void document.body.offsetWidth;
+ requestAnimationFrame(()=>document.body.classList.add('open'))};
+
+/* Tastatur am Computer (zum Testen) */
+document.addEventListener('keydown',e=>{const m={Backspace:'del',',':',','.':','};const k=m[e.key]||(/^[0-9]$/.test(e.key)?e.key:null);
+ if(k){const b=$('pad').querySelector(`[data-k="${k}"]`);b&&b.click()}else if(e.key=='Enter')$('go').click();else if(e.key=='Escape')dismiss()});
+
+reopen();
+}
+</script>
+</body>
+</html>

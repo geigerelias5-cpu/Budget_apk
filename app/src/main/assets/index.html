@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Budget</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+:root{--scr:#fafaf8;--ink:#111;--mut:#6b6b6b;--card:#fff;--line:#e2e2de;--red:#d71921;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--scr:#0c0c0c;--ink:#f2f2f2;--mut:#9a9a9a;--card:#181818;--line:#262626;color-scheme:dark}}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--scr);color:var(--ink);font:16px/1.5 Hanken,system-ui,sans-serif;overflow:hidden;user-select:none}
+.dot{font-family:Doto,monospace;font-weight:900;letter-spacing:.02em}
+.view{position:absolute;inset:0;display:flex;flex-direction:column;padding:12px 22px 24px;overflow-y:auto;scrollbar-width:none}
+.view::-webkit-scrollbar{display:none}
+.top{display:flex;justify-content:space-between;align-items:center;margin:8px 0 2px}
+.top h2{font-size:24px;margin:0;line-height:1.1}
+.ib{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);display:grid;place-items:center;flex:none}
+.mon{color:var(--mut);font-size:14px;margin:2px 0 0}
+.ring{position:relative;width:min(68vw,270px);aspect-ratio:1;margin:18px auto 10px}
+.ring svg{width:100%;height:100%;rotate:-90deg}
+.mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.mid .dot{font-size:clamp(26px,8vw,32px);line-height:1.1}
+.mid small{color:var(--mut);font-size:14px}
+.mid.over .dot{color:var(--red)}
+.sum{display:flex;justify-content:space-between;font-size:14px;color:var(--mut);border-block:1px solid var(--line);padding:11px 2px;margin:8px 0 10px}
+.sum b{color:var(--ink);font-weight:700}
+.leg{list-style:none;margin:0;padding:0}
+.leg li{display:grid;grid-template-columns:12px 1fr auto;gap:12px;align-items:center;font-size:15px;padding:7px 2px}
+.leg li i{width:12px;height:12px;border-radius:50%}
+.leg li span:last-child,.hist .a{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.leg li.zero{color:var(--mut)}
+h3{font-size:14px;color:var(--mut);font-weight:500;margin:20px 0 4px}
+.hist{list-style:none;margin:0 0 90px;padding:0}
+.hist li{display:grid;grid-template-columns:1fr auto 44px;align-items:center;gap:6px;border-bottom:1px solid var(--line);padding:5px 0;overflow:hidden;transition:opacity .3s,transform .3s,height .3s .15s,padding .3s .15s}
+.hist li div small{display:block;color:var(--mut);font-size:13px}
+.hist .x{width:44px;height:44px;border:0;background:none;color:var(--mut);font-size:22px;border-radius:12px}
+.empty{color:var(--mut);font-size:15px;padding:12px 0;display:block!important}
+.fab{position:fixed;right:22px;bottom:24px;width:60px;height:60px;border-radius:50%;border:0;background:var(--red);color:#fff;display:grid;place-items:center;box-shadow:0 14px 30px -10px #d7192199;z-index:5;transition:transform .2s,opacity .3s}
+.fab.hide{transform:scale(0);opacity:0}
+/* Setup & Einstellungen */
+.setup{justify-content:center;text-align:center;padding-inline:28px}
+.setup h2{font-size:32px;line-height:1.05;margin:0 0 10px}
+.setup p,.set p{color:var(--mut);margin:0 0 20px;font-size:15px}
+.field{display:flex;align-items:center;gap:8px;border:2px solid var(--ink);border-radius:20px;padding:4px 18px;background:var(--card)}
+.field input{flex:1;border:0;background:none;color:var(--ink);font:900 38px Doto,monospace;padding:8px 0;width:100%}
+.field input:focus{outline:none}
+.field span{font:900 30px Doto,monospace;color:var(--mut)}
+.pri{margin-top:14px;width:100%;min-height:54px;border:0;border-radius:18px;background:var(--ink);color:var(--scr);font:700 16px Hanken,sans-serif}
+.sec{margin-top:10px;width:100%;min-height:50px;border:1px solid var(--line);border-radius:18px;background:none;color:var(--ink);font:500 15px Hanken,sans-serif}
+.sec.warn{color:var(--red);border-color:#d7192155}
+.err{color:var(--red);font-size:14px;min-height:20px;margin-top:6px}
+.set label{font-size:14px;color:var(--mut);display:block;margin:18px 0 6px}
+/* Toast */
+.toast{position:fixed;left:18px;right:18px;bottom:96px;z-index:10;background:#000;color:#f2f2f2;border:1px solid #ffffff1f;border-radius:99px;padding:6px 6px 6px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 22px 44px -14px #000c;overflow:hidden;
+ opacity:0;transform:translateY(24px) scale(.96);filter:blur(4px);pointer-events:none;transition:transform .5s cubic-bezier(.2,.9,.2,1),opacity .35s,filter .35s}
+.toast.on{opacity:1;transform:none;filter:none;pointer-events:auto}
+.toast #tMsg{flex:1;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast #tMsg b{font:900 15px Doto,monospace;margin-right:4px}
+.toast button{flex:none;border:0;background:#f2f2f2;color:#000;font:600 14px Hanken,sans-serif;height:38px;padding:0 16px;border-radius:99px}
+.tbar{position:absolute;left:18px;right:18px;bottom:0;height:2px;background:var(--red);transform-origin:left;transform:scaleX(0)}
+.toast.on .tbar{animation:drain 4s linear forwards}
+/* Animationen */
+@keyframes up{from{opacity:0;transform:translateY(14px)}}
+@keyframes drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-18px)}}
+@keyframes pop{from{opacity:0;transform:scale(.85)}}
+.view.enter>*{animation:up .5s cubic-bezier(.2,.9,.2,1) both}
+.view.enter>*:nth-child(2){animation-delay:.05s}.view.enter>*:nth-child(3){animation-delay:.1s}.view.enter>*:nth-child(4){animation-delay:.15s}.view.enter>*:nth-child(5){animation-delay:.2s}.view.enter>*:nth-child(n+6){animation-delay:.25s}
+.ring .arc{transition:stroke-dasharray .9s cubic-bezier(.2,.9,.2,1),stroke-dashoffset .9s cubic-bezier(.2,.9,.2,1)}
+.mid.bump{animation:pop .45s cubic-bezier(.2,.9,.2,1)}
+.hist li.new{animation:slideIn .5s cubic-bezier(.2,.9,.2,1)}
+.hist li.new .a{color:var(--red);transition:color 1.2s}
+.hist li.out{opacity:0;transform:translateX(40px)}
+button{transition:transform .15s}button:active:not(:disabled){transform:scale(.95)}
+button:focus{outline:none}
+[hidden]{display:none!important}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="view setup" id="vS" hidden>
+  <h2>Wie viel willst du im Monat ausgeben?</h2>
+  <p>Dein Monatsbudget. Du kannst es später in den Einstellungen ändern.</p>
+  <label class="field"><input id="sB" inputmode="decimal" placeholder="800" aria-label="Monatsbudget in Euro"><span>€</span></label>
+  <div class="err" id="sE"></div>
+  <button class="pri" id="sGo">Los geht's</button>
+</div>
+
+<div class="view" id="vM" hidden>
+  <div class="top"><div><h2>Budget</h2><p class="mon" id="mM"></p></div>
+    <button class="ib" id="toSet" aria-label="Einstellungen"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="3"/><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3M4 4l2 2M14 14l2 2M4 16l2-2M14 6l2-2"/></svg></button></div>
+  <div class="ring"><svg viewBox="0 0 100 100" id="ring"></svg>
+    <div class="mid" id="mid"><span class="dot" id="mL">0 €</span><small id="mS">übrig</small></div></div>
+  <div class="sum"><span>Ausgegeben <b id="mSp">0 €</b></span><span>Budget <b id="mB">0 €</b></span></div>
+  <ul class="leg" id="leg"></ul>
+  <h3>Letzte Einträge</h3>
+  <ul class="hist" id="hist"></ul>
+</div>
+
+<div class="view set" id="vE" hidden>
+  <div class="top"><h2>Einstellungen</h2>
+    <button class="ib" id="back" aria-label="Zurück"><svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4l-6 6 6 6"/></svg></button></div>
+  <label for="eB">Monatsbudget</label>
+  <div class="field"><input id="eB" inputmode="decimal" aria-label="Monatsbudget in Euro"><span>€</span></div>
+  <div class="err" id="eE"></div>
+  <button class="pri" id="eSave">Speichern</button>
+  <label>Daten</label>
+  <p>Der Monat beginnt automatisch am 1. neu. Alte Einträge bleiben gespeichert.</p>
+  <button class="sec warn" id="eReset">Einträge dieses Monats löschen</button>
+  <button class="sec warn" id="eAll">Alles zurücksetzen</button>
+</div>
+
+<button class="fab hide" id="fab" aria-label="Ausgabe eintragen"><svg width="24" height="24" viewBox="0 0 20 20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10 4v12M4 10h12"/></svg></button>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="tMsg"></span><button id="tUndo">Rückgängig</button><i class="tbar"></i></div>
+
+<script src="common.js"></script>
+<script>
+{
+const $=id=>document.getElementById(id);
+let S=loadState(),view='M',tt,undoFn=null,fresh=true;
+const save=()=>saveState(S);
+const month=()=>S.entries.filter(inMonth);
+const spent=()=>month().reduce((a,e)=>a+e.amt,0);
+
+/* Navigation */
+function show(v){const ch=view!=v||$('v'+v).hidden;view=v;
+ for(const k of ['S','M','E'])$('v'+k).hidden=k!=v;
+ $('fab').classList.toggle('hide',v!='M');
+ if(ch){const el=$('v'+v);el.classList.remove('enter');void el.offsetWidth;el.classList.add('enter');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('enter'),1000);if(v=='M')fresh=true}
+ if(v=='E'){$('eB').value=String(S.budget).replace('.',',');$('eE').textContent='';arm(null)}}
+$('toSet').onclick=()=>show('E');
+$('back').onclick=()=>{document.activeElement.blur();show('M');render()};
+window.goBack=()=>{if(view=='E'){document.activeElement.blur();show('M');render();return true}return false};
+$('fab').onclick=()=>{if(NATIVE)Android.openQuickAdd()};
+
+/* Setup */
+function setBudget(inp,err){const v=num($(inp).value);if(!(v>0)){$(err).textContent='Bitte einen Betrag über 0 eingeben.';return false}S.budget=v;save();return true}
+$('sGo').onclick=()=>{if(setBudget('sB','sE')){document.activeElement.blur();show('M');render()}};
+$('sB').onkeydown=e=>{if(e.key=='Enter')$('sGo').click()};
+
+/* Einstellungen */
+$('eSave').onclick=()=>{if(setBudget('eB','eE')){document.activeElement.blur();show('M');render();toast('Budget gespeichert')}};
+let armed=null;function arm(b){armed=b;$('eReset').textContent=b=='r'?'Wirklich löschen? Nochmal tippen':'Einträge dieses Monats löschen';$('eAll').textContent=b=='a'?'Wirklich alles löschen? Nochmal tippen':'Alles zurücksetzen'}
+$('eReset').onclick=()=>{if(armed!='r')return arm('r');const old=S.entries.slice();S.entries=S.entries.filter(e=>!inMonth(e));save();arm(null);show('M');render();toast('Monat geleert',()=>{S.entries=old;save();render()})};
+$('eAll').onclick=()=>{if(armed!='a')return arm('a');S={budget:0,entries:[]};save();arm(null);$('sB').value='';show('S')};
+
+/* Toast */
+function toast(msg,undo){const t=$('toast');$('tMsg').innerHTML=msg;undoFn=undo||null;$('tUndo').hidden=!undo;
+ t.classList.remove('on');void t.offsetWidth;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),4000)}
+$('tUndo').onclick=()=>{if(undoFn)undoFn();undoFn=null;$('toast').classList.remove('on')};
+
+/* Eintrag löschen */
+$('hist').addEventListener('click',e=>{const b=e.target.closest('.x');if(!b)return;const i=S.entries.findIndex(x=>x.id==b.dataset.id);if(i<0)return;
+ const li=b.closest('li');li.style.height=li.offsetHeight+'px';void li.offsetWidth;li.classList.add('out');li.style.height='0px';li.style.paddingBlock='0';
+ const [r]=S.entries.splice(i,1);save();setTimeout(()=>render(),420);
+ toast(`<b>${eur.format(r.amt)}</b> gelöscht`,()=>{S.entries.push(r);save();render({newId:r.id})})});
+
+/* Ring */
+const RR=40,CC=2*Math.PI*RR;
+$('ring').innerHTML=`<circle cx="50" cy="50" r="${RR}" fill="none" stroke-dasharray="0.01 3.12" stroke-linecap="round" style="stroke:var(--mut);stroke-width:2.4;opacity:.5"/>`+
+ CATS.map(c=>`<circle class="arc" id="seg-${c.id}" cx="50" cy="50" r="${RR}" fill="none" stroke-width="11" style="stroke:${c.c};stroke-dasharray:0 ${CC};stroke-dashoffset:0"></circle>`).join('');
+function ring(){const tot=spent(),base=Math.max(S.budget||1,tot);let off=0;const segs=CATS.map(c=>$('seg-'+c.id));
+ if(fresh){for(const g of segs){g.style.transition='none';g.style.strokeDasharray=`0 ${CC}`;g.style.strokeDashoffset='0'}void $('ring').getBoundingClientRect();for(const g of segs)g.style.transition=''}
+ fresh=false;
+ CATS.forEach((c,i)=>{const v=month().filter(e=>e.cat==c.id).reduce((a,e)=>a+e.amt,0),len=v/base*CC,gap=len>1.2?.8:0,g=segs[i],o=-off;
+  requestAnimationFrame(()=>{g.style.strokeDasharray=`${Math.max(len-gap,0)} ${CC}`;g.style.strokeDashoffset=o});off+=len})}
+
+/* Zahlen hochzählen */
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function countTo(el,to,fmt){const from=el._v??0;el._v=to;cancelAnimationFrame(el._r);
+ if(reduce||from===to){el.textContent=fmt(to);return}const t0=performance.now(),D=700;
+ const step=t=>{const k=Math.min(1,(t-t0)/D),e=1-(1-k)**3;el.textContent=fmt(from+(to-from)*e);if(k<1)el._r=requestAnimationFrame(step)};el._r=requestAnimationFrame(step)}
+
+function render(o={}){
+ const tot=spent(),left=S.budget-tot;
+ if(!S.budget){show('S');return}
+ if(view=='S')show('M');
+ $('mM').textContent=new Date().toLocaleDateString('de-DE',{month:'long',year:'numeric'});
+ const wasOver=$('mid').classList.contains('over');
+ countTo($('mL'),Math.abs(left),eur0);$('mS').textContent=left<0?'über Budget':'übrig von '+eur0(S.budget);
+ $('mid').classList.toggle('over',left<0);
+ if(wasOver!=(left<0)||o.newId){const m=$('mid');m.classList.remove('bump');void m.offsetWidth;m.classList.add('bump')}
+ countTo($('mSp'),tot,v=>eur.format(v));$('mB').textContent=eur0(S.budget);
+ ring();
+ const rows=CATS.map(c=>({...c,v:month().filter(e=>e.cat==c.id).reduce((a,e)=>a+e.amt,0)})).sort((a,b)=>b.v-a.v);
+ $('leg').innerHTML=rows.map(r=>`<li class="${r.v?'':'zero'}"><i style="background:${r.c}"></i><span>${r.n}</span><span>${eur.format(r.v)}</span></li>`).join('');
+ const list=month().sort((a,b)=>b.ts-a.ts).slice(0,30);
+ $('hist').innerHTML=list.length?list.map(e=>{const c=CATS.find(c=>c.id==e.cat)||CATS[5],d=new Date(e.ts);
+  return `<li class="${e.id==o.newId?'new':''}"><div>${c.n}<small>${d.toLocaleDateString('de-DE',{day:'numeric',month:'short'})}, ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</small></div><span class="a">${eur.format(e.amt)}</span><button class="x" data-id="${e.id}" aria-label="Eintrag löschen">×</button></li>`}).join('')
+  :'<li class="empty">Noch nichts eingetragen. Tippe auf + oder nutze das Widget.</li>';
+ if(o.newId){const n=$('hist').querySelector('.new .a');if(n)requestAnimationFrame(()=>requestAnimationFrame(()=>n.style.color='inherit'))}
+}
+
+/* Zurück in die App (z. B. nach Eintrag über das Widget) */
+window.nativeResume=()=>{const before=new Set(S.entries.map(e=>e.id));S=loadState();
+ const added=S.entries.filter(e=>!before.has(e.id)).sort((a,b)=>b.ts-a.ts)[0];
+ if(!S.budget){show('S');return}
+ if(view=='S')show('M');
+ if(view=='M')fresh=true;
+ render(added?{newId:added.id}:{})};
+
+show(S.budget?'M':'S');render();
+}
+</script>
+</body>
+</html>

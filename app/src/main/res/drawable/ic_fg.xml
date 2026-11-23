@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vordergrund des App-Icons: Ring mit rotem Ausgabe-Segment -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- grauer Rest-Ring -->
+    <path
+        android:pathData="M54,36 A18,18 0 1,1 53.99,36"
+        android:strokeColor="#4D4D4D"
+        android:strokeWidth="7"
+        android:fillColor="#00000000" />
+    <!-- weißes Segment -->
+    <path
+        android:pathData="M54,36 A18,18 0 0,1 72,54"
+        android:strokeColor="#F2F2F2"
+        android:strokeWidth="7"
+        android:fillColor="#00000000" />
+    <!-- rotes Segment -->
+    <path
+        android:pathData="M72,54 A18,18 0 0,1 54,72"
+        android:strokeColor="#D71921"
+        android:strokeWidth="7"
+        android:fillColor="#00000000" />
+</vector>

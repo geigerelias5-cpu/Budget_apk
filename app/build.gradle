@@ -1,0 +1,44 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'de.budget.tracker'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'de.budget.tracker'
+        minSdk 29
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+    }
+
+    signingConfigs {
+        // Fester Schlüssel im Projekt: so kannst du spätere Versionen als Update
+        // installieren, ohne die App (und deine Daten) vorher zu löschen.
+        budget {
+            storeFile file('budget.keystore')
+            storePassword 'budget123'
+            keyAlias 'budget'
+            keyPassword 'budget123'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.budget
+        }
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
