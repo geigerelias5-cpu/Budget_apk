@@ -1,7 +1,7 @@
 /* Gemeinsame Daten-Logik für App und Schnelleingabe */
 window.CATS = [
   {id:'essen',     n:'Essen',     c:'#d71921'},
-  {id:'einkauf',   n:'Einkauf',   c:'var(--ink)', w:'#f2f2f2'},
+  {id:'einkauf',   n:'Brotzeit',  c:'var(--ink)', w:'#f2f2f2'},
   {id:'transport', n:'Sprit',     c:'#8a8a8a'},
   {id:'freizeit',  n:'Freizeit',  c:'#f08c90'},
   {id:'wohnen',    n:'Versicherung', c:'#4d4d4d'},

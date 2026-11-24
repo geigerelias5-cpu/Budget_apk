@@ -16,7 +16,7 @@ final class Store {
     private static final String KEY = "state";
 
     static final String[] CAT_IDS = {"essen", "einkauf", "transport", "freizeit", "wohnen", "sonst"};
-    static final String[] CAT_NAMES = {"Essen", "Einkauf", "Sprit", "Freizeit", "Versicherung", "Sonstiges"};
+    static final String[] CAT_NAMES = {"Essen", "Brotzeit", "Sprit", "Freizeit", "Versicherung", "Sonstiges"};
     static final int[] CAT_COLORS = {0xFFD71921, 0xFFF2F2F2, 0xFF8A8A8A, 0xFFF08C90, 0xFF6B6B6B, 0xFFC4C4BF};
     /** Farbe der eigenen Kategorie „Dauerbeträge“ (Index 6 in byCat). */
     static final int FIX_COLOR = 0xFF8C1016;
