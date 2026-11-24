@@ -524,6 +524,9 @@ const curYM=()=>pk(now());
 const inMonth=e=>pk(e.ts)==curYM();
 const month=()=>S.entries.filter(inMonth);
 const daysLeft=()=>{const n=now(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.max(1,Math.round((pEnd(curYM())-t)/864e5))};
+/* Tagesbudget: Rest zu Tagesbeginn ÷ verbleibende Tage, minus was heute schon ausgegeben wurde */
+const spentToday=()=>{const n=now(),t0=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime();return S.entries.filter(e=>!e.fixed&&e.ts>=t0&&inMonth(e)).reduce((a,e)=>a+e.amt,0)};
+const todayLeft=left=>{const st=spentToday(),v=(left+st)/daysLeft()-st;return Math.sign(v)*Math.floor(Math.abs(v)*100)/100};
 const fmtDM=d=>d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
 const pRange=k=>`${fmtDM(pStart(k))} – ${fmtDM(new Date(pEnd(k)-864e5))}`;
 const ymAdd=(k,n)=>{const [y,m]=k.split('-').map(Number);return ymOf(new Date(y,m-1+n,1))};
@@ -852,9 +855,9 @@ function render(o={}){syncCats();
  $('mM').textContent=SD()>1?`${mName(curYM(),{month:'long'})} · ${pRange(curYM()).replace(' – ','–')}`:mName(curYM());
  const wasOver=$('mid').classList.contains('over');
  countTo($('mL'),Math.abs(left),eur0);$('mS').textContent=left<0?'über Budget':'übrig von '+eur0(S.budget);
- {const pd=left/daysLeft();
-  $('mPd').classList.toggle('over',left<0);
-  $('mPd').innerHTML=left<0?'<b>Budget aufgebraucht</b>':`Heute noch <b>${eur.format(Math.floor(pd*100)/100)}</b> pro Tag`}
+ {const t=todayLeft(left);
+  $('mPd').classList.toggle('over',left<0||t<0);
+  $('mPd').innerHTML=left<0?'<b>Budget aufgebraucht</b>':t>=0?`Heute noch <b>${eur.format(t)}</b> übrig`:`Heute <b>${eur.format(-t)}</b> über dem Tagesbudget`}
  $('mid').classList.toggle('over',left<0);
  if(wasOver!=(left<0)||o.newId){const m=$('mid');m.classList.remove('bump');void m.offsetWidth;m.classList.add('bump')}
  countTo($('mSp'),tot,v=>eur.format(v));$('mB').textContent=eur0(S.budget);

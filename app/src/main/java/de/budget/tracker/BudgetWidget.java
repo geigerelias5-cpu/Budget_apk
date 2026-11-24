@@ -82,11 +82,12 @@ public class BudgetWidget extends AppWidgetProvider {
             v.setProgressBar(over ? R.id.w_bar_red : R.id.w_bar, 100, pct, false);
         }
         if (type == RING) {
-            // Unter dem Plus: was heute noch pro Tag ausgegeben werden kann
+            // Unter dem Plus: was heute noch übrig ist (Tagesbudget minus heutige Ausgaben)
             String perDay = "übrig";
             if (left != null) {
-                int daysLeft = Store.daysLeft(c);
-                perDay = left < 0 ? "über Budget" : Store.euro(Math.floor(left / daysLeft * 100) / 100) + "/Tag";
+                double t = (left + mo.spentToday) / Store.daysLeft(c) - mo.spentToday;
+                t = Math.signum(t) * Math.floor(Math.abs(t) * 100) / 100;
+                perDay = left < 0 ? "über Budget" : t >= 0 ? "heute noch " + Store.euro(t) : Store.euro(-t) + " drüber";
             }
             v.setTextViewText(R.id.w_month, perDay);
             // Glatte Beträge (ohne Cent) sind kürzer und dürfen größer sein

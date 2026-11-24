@@ -64,7 +64,7 @@ final class Store {
 
     /** Zahlen des laufenden Monats. byCat: alle Kategorien + Dauerbeträge am Ende. */
     static final class Month {
-        double budget, spent;
+        double budget, spent, spentToday;
         Cat[] cats;
         double[] byCat;
     }
@@ -242,6 +242,10 @@ final class Store {
             int sd = startDay(o.toString());
             String ym = periodKey(System.currentTimeMillis(), sd);
             java.util.HashSet<String> fixedSeen = new java.util.HashSet<>();
+            Calendar t0 = Calendar.getInstance();
+            t0.set(Calendar.HOUR_OF_DAY, 0); t0.set(Calendar.MINUTE, 0);
+            t0.set(Calendar.SECOND, 0); t0.set(Calendar.MILLISECOND, 0);
+            long todayStart = t0.getTimeInMillis();
             JSONArray arr = o.optJSONArray("entries");
             if (arr != null) {
                 for (int i = 0; i < arr.length(); i++) {
@@ -251,6 +255,7 @@ final class Store {
                     m.spent += amt;
                     String fixedId = e.optString("fixed", "");
                     if (!fixedId.isEmpty()) fixedSeen.add(fixedId);
+                    else if (e.optLong("ts") >= todayStart) m.spentToday += amt;
                     m.byCat[fixedId.isEmpty() ? catIndex(m.cats, e.optString("cat")) : m.cats.length] += amt;
                 }
             }
