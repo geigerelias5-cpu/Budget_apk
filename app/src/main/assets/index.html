@@ -305,6 +305,20 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .step button{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:none;color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
 .step b.dot{min-width:46px;text-align:center;font-size:24px}
 .mh small.rg{display:block;font-weight:400;font-size:12px;color:var(--mut)}
+/* Kategorien bearbeiten */
+.kl{margin-bottom:8px}
+#kInfo{margin-bottom:22px}
+.kl li .a{color:var(--mut);font-size:13px}
+.kpal{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:0 0 12px}
+.kpal button{aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;position:relative;box-shadow:inset 0 0 0 1px #ffffff22}
+.kpal button[aria-checked="true"]::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid #f2f2f2}
+#ks .wlock{margin-bottom:8px}
+.kpos{display:flex;align-items:center;gap:8px;font-size:13px;color:#8a8a8a;padding:0 4px}
+.kpos span{flex:1}
+.kpos button{width:42px;height:38px;border-radius:12px;border:1px solid #ffffff1c;background:#141414;color:#f2f2f2;font-size:17px;cursor:pointer}
+.kpos button:disabled{opacity:.3}
+#ks .del{display:block;margin:10px auto 0;border:0;background:none;color:var(--red);font:500 14px "Hanken Grotesk",sans-serif;cursor:pointer;min-height:40px}
+#ks .del:disabled{color:#555}
 [hidden]{display:none!important}
 footer{text-align:center;color:var(--mut);font-size:13px;padding:0 16px 32px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -380,6 +394,10 @@ button:focus{outline:none}
         <label>Monatsbeginn</label>
         <div class="sdrow"><span><b>Neuer Monat ab dem</b><small id="sdHint">z. B. der Tag, an dem dein Gehalt kommt</small></span>
           <div class="step"><button type="button" id="sdM" aria-label="Früher">−</button><b class="dot" id="sdV">1.</b><button type="button" id="sdP" aria-label="Später">+</button></div></div>
+        <label>Kategorien</label>
+        <ul class="fxl kl" id="kl"></ul>
+        <button class="sec" id="kAdd">+ Kategorie hinzufügen</button>
+        <p class="xinfo" id="kInfo">Bis zu 8 Kategorien. Antippen zum Umbenennen, Umfärben oder Löschen.</p>
         <label>Daten übertragen</label>
         <p>Sichert alle Einträge, dein Budget und die Dauerbeträge in einer Datei. Auf dem neuen Gerät „Importieren“ tippen und die Datei auswählen.</p>
         <div class="xio"><button class="sec" id="eExp">Exportieren</button><button class="sec" id="eImp">Importieren</button></div>
@@ -402,8 +420,8 @@ button:focus{outline:none}
           <div class="pad" id="qsP"></div>
           <button class="sv" id="qsS" disabled>Speichern</button>
         </div>
-        <div class="ns" id="ns" role="dialog" aria-label="Sonstiges beschreiben">
-          <h4>Sonstiges – wofür?</h4>
+        <div class="ns" id="ns" role="dialog" aria-label="Notiz">
+          <h4 id="nsT">Sonstiges – wofür?</h4>
           <p>Kurz notieren, damit du es später wiederfindest.</p>
           <input id="nsI" maxlength="40" placeholder="z. B. Geschenk für Lea" autocomplete="off" enterkeyhint="done">
           <div class="row"><button class="no" id="nsX">Abbrechen</button><button class="ok" id="nsO">Übernehmen</button></div>
@@ -446,18 +464,43 @@ button:focus{outline:none}
           <button type="button" class="del" id="fsD" hidden>Dauerbetrag löschen</button>
         </div>
       </div>
+      <div class="qs" id="kq" aria-hidden="true">
+        <div class="dim" id="kqDim"></div>
+        <div class="ns" id="ks" role="dialog" aria-label="Kategorie">
+          <h4 id="ksT">Kategorie bearbeiten</h4>
+          <p id="ksSub">Name und Farbe gelten sofort überall, auch in den Widgets.</p>
+          <input id="ksN" maxlength="16" placeholder="Name, z. B. Brotzeit" autocomplete="off" enterkeyhint="done">
+          <div class="wsec">Farbe</div>
+          <div class="kpal" id="ksC" role="radiogroup" aria-label="Farbe"></div>
+          <button type="button" class="wlock" id="ksQ"><span><b>Nach Notiz fragen</b><small>Beim Eintragen kurz notieren, wofür, wie bei „Sonstiges“</small></span><span class="sw" id="ksQs"></span></button>
+          <div class="kpos" id="ksPos"><span id="ksPv">Position 1 von 6</span><button type="button" id="ksUp" aria-label="Nach oben">↑</button><button type="button" id="ksDn" aria-label="Nach unten">↓</button></div>
+          <div class="row"><button type="button" class="no" id="ksX">Abbrechen</button><button type="button" class="ok" id="ksO">Speichern</button></div>
+          <button type="button" class="del" id="ksD" hidden>Kategorie löschen</button>
+        </div>
+      </div>
       <div class="toast" id="toast" role="status" aria-live="polite"><span id="tMsg"></span><button id="tUndo">Rückgängig</button><i class="tbar"></i></div>
     </div>
 <script>
 {
-const CATS=[
+const DEFCATS=[
  {id:'essen',n:'Essen',c:'#d71921'},
- {id:'einkauf',n:'Brotzeit',c:'light-dark(#111,#f2f2f2)',w:'#111'},
+ {id:'einkauf',n:'Einkauf',c:'light-dark(#111,#f2f2f2)'},
  {id:'transport',n:'Sprit',c:'#8a8a8a'},
  {id:'freizeit',n:'Freizeit',c:'#f08c90'},
  {id:'wohnen',n:'Versicherung',c:'#4d4d4d'},
- {id:'sonst',n:'Sonstiges',c:'#c4c4bf'}];
-const FIXCAT={id:'fix',n:'Dauerbeträge',c:'#8c1016'},ALL=[...CATS,FIXCAT];
+ {id:'sonst',n:'Sonstiges',c:'#c4c4bf',q:1}];
+/* Farbauswahl für eigene Kategorien (Dunkelrot bleibt den Dauerbeträgen vorbehalten) */
+const PAL=['#d71921','light-dark(#111,#f2f2f2)','#8a8a8a','#f08c90','#4d4d4d','#c4c4bf','#e8892b','#f2c230','#3aa76d','#2bb3b1','#2f7de1','#8e5bd6'];
+const MAXCATS=8;
+const FIXCAT={id:'fix',n:'Dauerbeträge',c:'#8c1016'};
+let CATS=DEFCATS,ALL=[...CATS,FIXCAT],catSig=null;const catBuilders=[];
+/* Farbe auf dunklem Grund (Widgets, Eingabefenster) */
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const wcol=c=>/light-dark/.test(c.c)?'#f2f2f2':c.c;
+const catOf=id=>ALL.find(c=>c.id==id)||{id,n:'Ohne Kategorie',c:'#c4c4bf'};
+const isN=id=>!!(CATS.find(c=>c.id==id)||{}).q;
+function catsFromS(){const ok=S&&Array.isArray(S.cats)&&S.cats.length;CATS=ok?S.cats:DEFCATS;ALL=[...CATS,FIXCAT]}
+function syncCats(){const sig=JSON.stringify(S.cats||null);if(sig===catSig)return;catSig=sig;catsFromS();catBuilders.forEach(f=>f());fresh=true}
 const KEY='budget-proto-v1',$=id=>document.getElementById(id);
 /* €-Zeichen eng an die Zahl */
 const _eur=new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'});
@@ -468,6 +511,7 @@ const NATIVE=typeof window.Android!=='undefined';
 function load(){try{const r=NATIVE?Android.getData():localStorage.getItem(KEY);if(r){const x=JSON.parse(r);if(x&&Array.isArray(x.entries))return Object.assign({budget:0,entries:[],budgets:{},fixed:[]},x)}}catch(e){}return {budget:0,entries:[],budgets:{},fixed:[]}}
 S=load();
 const save=()=>{const j=JSON.stringify(S);try{if(NATIVE)Android.setData(j);else localStorage.setItem(KEY,j)}catch(e){}};
+catsFromS();
 const num=s=>{s=String(s).trim().replace(/\s|€/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const v=parseFloat(s);return isFinite(v)?Math.round(v*100)/100:NaN};
 const now=()=>new Date();
 /* Budget-Monat: beginnt am Starttag (z. B. Gehalt am 26.) und heißt nach dem Startmonat-Schlüssel "JJJJ-MM" */
@@ -532,6 +576,42 @@ $('eExp').onclick=async()=>{const json=backupJSON(),name=backupName(),info=$('eI
   setTimeout(()=>URL.revokeObjectURL(a.href),4000);info.textContent=`Gespeichert: ${name}`}catch(e){info.textContent='Speichern hat nicht geklappt.'}};
 $('eImp').onclick=()=>{$('eInfo').textContent='';if(hasBridge('importData')){Android.importData();return}$('impFile').value='';$('impFile').click()};
 $('sImp').onclick=()=>$('eImp').click();
+/* Kategorien bearbeiten */
+const kfx='<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 4l6 6-6 6"/></svg>';
+function renderCats(){const cnt={};for(const e of S.entries)cnt[e.cat]=(cnt[e.cat]||0)+1;
+ $('kl').innerHTML=CATS.map(c=>`<li><button type="button" data-k="${c.id}"><i style="background:${c.c}"></i><span><b>${esc(c.n)}</b><small>${cnt[c.id]?cnt[c.id]+' Einträge':'noch leer'}${c.q?' · mit Notiz':''}</small></span><span class="a"></span>${kfx}</button></li>`).join('');
+ $('kAdd').hidden=CATS.length>=MAXCATS;$('kInfo').textContent=CATS.length>=MAXCATS?'Maximal 8 Kategorien – lösch eine, um eine neue anzulegen.':'Bis zu 8 Kategorien. Antippen zum Umbenennen, Umfärben oder Löschen.'}
+let kEdit=null,kCol=null,kQ=false,kPos=0;
+function kUI(){const n=kEdit?CATS.length:CATS.length+1;
+ for(const b of $('ksC').children)b.setAttribute('aria-checked',b.dataset.c==kCol);
+ $('ksQs').classList.toggle('on',kQ);$('ksPv').textContent=`Position ${kPos+1} von ${n}`;$('ksUp').disabled=kPos<=0;$('ksDn').disabled=kPos>=n-1}
+$('ksC').innerHTML=PAL.map(c=>`<button type="button" role="radio" data-c="${c}" style="background:${wcol({c})}" aria-label="Farbe"></button>`).join('');
+function openK(c){kEdit=c||null;const used=new Set(CATS.map(x=>x.c));
+ kCol=c?c.c:(PAL.find(x=>!used.has(x))||PAL[0]);kQ=c?!!c.q:false;kPos=c?CATS.indexOf(c):CATS.length;
+ $('ksT').textContent=c?'Kategorie bearbeiten':'Neue Kategorie';$('ksN').value=c?c.n:'';
+ $('ksD').hidden=!c;$('ksD').disabled=CATS.length<=1;$('ksD').textContent=CATS.length<=1?'Mindestens eine Kategorie muss bleiben':'Kategorie löschen';
+ kUI();$('kq').classList.add('on');$('kq').setAttribute('aria-hidden','false');$('ks').classList.add('on');if(!c)setTimeout(()=>$('ksN').focus(),350)}
+function closeK(){$('ks').classList.remove('on');$('kq').classList.remove('on');$('kq').setAttribute('aria-hidden','true');document.activeElement.blur()}
+$('kl').addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)openK(CATS.find(c=>c.id==b.dataset.k))});
+$('kAdd').onclick=()=>{if(CATS.length<MAXCATS)openK()};
+$('ksC').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(b){kCol=b.dataset.c;kUI()}});
+$('ksQ').onclick=()=>{kQ=!kQ;kUI()};
+$('ksUp').onclick=()=>{kPos--;kUI()};$('ksDn').onclick=()=>{kPos++;kUI()};
+$('ksX').onclick=closeK;$('kqDim').onclick=closeK;
+$('ksN').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('ksN').blur()}else if(e.key=='Escape'){e.stopPropagation();closeK()}});
+$('ksO').onclick=()=>{const n=$('ksN').value.trim().replace(/\s+/g,' ');if(!n){shake($('ksN'));$('ksN').focus();return}
+ if(CATS.some(c=>c!==kEdit&&c.n.toLowerCase()==n.toLowerCase())){shake($('ksN'));toast('Diesen Namen gibt es schon');return}
+ const list=CATS.map(c=>({...c}));let it;
+ if(kEdit){const i=CATS.indexOf(kEdit);it=list.splice(i,1)[0]}else it={id:'k'+Date.now().toString(36)};
+ it.n=n;it.c=kCol;if(kQ)it.q=1;else delete it.q;list.splice(kPos,0,it);
+ S.cats=list;save();closeK();render();renderCats();toast(kEdit?`„${esc(n)}“ gespeichert`:`„${esc(n)}“ hinzugefügt`)};
+$('ksD').onclick=()=>{if(!kEdit||CATS.length<=1)return;const gone=kEdit,oldCats=CATS.map(c=>({...c}));
+ const rest=CATS.filter(c=>c!==gone),to=rest.find(c=>c.q)||rest[rest.length-1],moved=[];
+ for(const e of S.entries)if(e.cat==gone.id){moved.push([e,e.note]);e.cat=to.id;if(to.q&&!e.note)e.note=gone.n}
+ S.cats=rest.map(c=>({...c}));save();closeK();render();renderCats();
+ toast(moved.length?`„${esc(gone.n)}“ gelöscht · ${moved.length} Einträge → ${esc(to.n)}`:`„${esc(gone.n)}“ gelöscht`,()=>{
+  for(const [e,nt] of moved){e.cat=gone.id;if(nt===undefined)delete e.note;else e.note=nt}S.cats=oldCats;save();render();renderCats()})};
+$('toSet').addEventListener('click',()=>{syncCats();renderCats()});
 /* Monatsbeginn einstellen */
 function sdUI(){$('sdV').textContent=SD()+'.';$('sdTxt').textContent=SD()+'.';$('sdHint').textContent=SD()>1?`Monat läuft vom ${SD()}. bis ${SD()-1}. des Folgemonats`:'z. B. der Tag, an dem dein Gehalt kommt'}
 function sdSet(d){d=Math.min(28,Math.max(1,d));if(d===SD())return;
@@ -578,13 +658,14 @@ $('hist').addEventListener('click',e=>{const b=e.target.closest('.x');if(!b)retu
  if(r.fixed){fx=(S.fixed||[]).find(f=>f.id==r.fixed);if(fx){fx.skip=fx.skip||[];fx.skip.push(pk(r.ts))}}
  save();
  setTimeout(()=>render(),420);
- const c=ALL.find(c=>c.id==r.cat)||ALL[5];
+ const c=catOf(r.cat);
  toast(`<b>${eur.format(r.amt)}</b> gelöscht`,()=>{if(fx)fx.skip=fx.skip.filter(x=>x!=pk(r.ts));S.entries.push(r);save();render({newId:r.id})})});
 
 /* Ring */
 const RR=40,CC=2*Math.PI*RR;let fresh=true;
-$('ring').innerHTML=`<circle cx="50" cy="50" r="${RR}" fill="none" stroke-dasharray="0.01 3.12" stroke-linecap="round" style="stroke:var(--mut);stroke-width:2.4;opacity:.5"/>`+
- ALL.map(c=>`<circle class="arc" id="seg-${c.id}" cx="50" cy="50" r="${RR}" fill="none" stroke-width="11" style="stroke:${c.c};stroke-dasharray:0 ${CC};stroke-dashoffset:0"><title></title></circle>`).join('');
+function buildRing(){$('ring').innerHTML=`<circle cx="50" cy="50" r="${RR}" fill="none" stroke-dasharray="0.01 3.12" stroke-linecap="round" style="stroke:var(--mut);stroke-width:2.4;opacity:.5"/>`+
+ ALL.map(c=>`<circle class="arc" id="seg-${c.id}" cx="50" cy="50" r="${RR}" fill="none" stroke-width="11" style="stroke:${c.c};stroke-dasharray:0 ${CC};stroke-dashoffset:0"><title></title></circle>`).join('')}
+buildRing();catBuilders.push(buildRing);
 function ring(){const tot=spent(),base=Math.max(S.budget||1,tot);let off=0;const segs=ALL.map(c=>$('seg-'+c.id));
  if(fresh){for(const g of segs){g.style.transition='none';g.style.strokeDasharray=`0 ${CC}`;g.style.strokeDashoffset='0'}void $('ring').getBoundingClientRect();for(const g of segs)g.style.transition=''}
  fresh=false;
@@ -675,33 +756,34 @@ $('mlist').addEventListener('click',e=>{const b=e.target.closest('.mc>button');i
 
 /* Schnelleingabe (wie das Fenster in der echten App) */
 let qv='',qcat=null,qbusy=false,qnote='';
-const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-$('qsC').innerHTML=CATS.map(c=>`<button type="button" class="cat" data-c="${c.id}" aria-pressed="false"><i style="background:${c.id=='einkauf'?'#f2f2f2':c.c}"></i>${c.n}</button>`).join('');
+function buildQ(){$('qsC').innerHTML=CATS.map(c=>`<button type="button" class="cat" data-c="${c.id}" aria-pressed="false"><i style="background:${wcol(c)}"></i>${esc(c.n)}</button>`).join('')}
+buildQ();catBuilders.push(buildQ);
 $('qsP').innerHTML=['1','2','3','4','5','6','7','8','9','del','0',','].map(k=>k=='del'?`<button class="del" data-k="del" aria-label="Löschen">⌫</button>`:`<button data-k="${k}">${k}</button>`).join('');
 function qUpd(){const v=$('qsV');if(!qv){v.textContent='0,00';v.classList.add('ph')}else{v.classList.remove('ph');const [a,b]=qv.split(',');v.textContent=Number(a||'0').toLocaleString('de-DE')+(b!==undefined?','+b:'')}
  $('qsS').disabled=!(num(qv)>0)}
-function qSel(id){qcat=id;if(id!='sonst')qnote='';
- for(const b of $('qsC').children){b.setAttribute('aria-pressed',b.dataset.c==id);
-  if(b.dataset.c=='sonst')b.innerHTML=`<i style="background:#c4c4bf"></i><span class="nt">${qnote?esc(qnote):'Sonstiges'}</span>`}}
+function qSel(id){qcat=id;if(!isN(id))qnote='';
+ for(const b of $('qsC').children){b.setAttribute('aria-pressed',b.dataset.c==id);const c=catOf(b.dataset.c);
+  if(c.q)b.innerHTML=`<i style="background:${wcol(c)}"></i><span class="nt">${qnote&&id==c.id?esc(qnote):esc(c.n)}</span>`}}
 /* Notiz-Fenster für „Sonstiges“ */
 function sugHTML(){const used=[...new Set(S.entries.filter(e=>e.note).sort((a,b)=>b.ts-a.ts).map(e=>e.note))].slice(0,4);
  const sug=[...used,...['Geschenk','Drogerie','Kleidung','Gesundheit','Abo'].filter(x=>!used.includes(x))].slice(0,6);
  return sug.map(t=>`<button type="button">${esc(t)}</button>`).join('')}
-function openN(){
- $('nsI').value=qnote;$('ns').classList.add('on');setTimeout(()=>$('nsI').focus(),350)}
+let nsc=null;
+function openN(id){nsc=id||qcat;$('nsT').textContent=catOf(nsc).n+' – wofür?';
+ $('nsI').value=qcat==nsc?qnote:'';$('ns').classList.add('on');setTimeout(()=>$('nsI').focus(),350)}
 function closeN(){$('ns').classList.remove('on');$('nsI').blur()}
 
-$('nsO').onclick=()=>{qnote=$('nsI').value.trim();qSel('sonst');closeN()};
+$('nsO').onclick=()=>{qnote=$('nsI').value.trim();qSel(nsc);closeN()};
 $('nsX').onclick=()=>{closeN();if(!qnote)qSel(null)};
 $('nsI').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('nsO').click()}else if(e.key=='Escape'){e.stopPropagation();$('nsX').click()}});
 let qEdit=null;
 function openQ(cat,amount,edit){qEdit=edit||null;qv=amount||'';qbusy=false;qnote='';closeN();qSel(cat||null);
- if(edit&&cat=='sonst'&&edit.note){qnote=edit.note;qSel('sonst')}
+ if(edit&&isN(cat)&&edit.note){qnote=edit.note;qSel(cat)}
  $('qsH').textContent=edit?'Ausgabe bearbeiten':'Ausgabe eintragen';qUpd();const l=S.budget-spent();$('qsL').textContent=eur0(l);$('qsL').classList.toggle('neg',l<0);
  $('qsS').classList.remove('ok');$('qsS').textContent='Speichern';$('qs').classList.add('on');$('qs').setAttribute('aria-hidden','false')}
 function closeQ(){$('qs').classList.remove('on');$('qs').setAttribute('aria-hidden','true')}
 $('qsDim').onclick=closeQ;
-$('qsC').addEventListener('click',e=>{const b=e.target.closest('.cat');if(!b)return;qSel(b.dataset.c);if(b.dataset.c=='sonst')openN()});
+$('qsC').addEventListener('click',e=>{const b=e.target.closest('.cat');if(!b)return;qSel(b.dataset.c);if(isN(b.dataset.c))openN(b.dataset.c)});
 $('qsP').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||qbusy)return;const k=b.dataset.k;
  if(k=='del')qv=qv.slice(0,-1);else if(k==','){if(!qv.includes(','))qv=(qv||'0')+','}
  else{const [a,c]=qv.split(',');if(c!==undefined){if(c.length>=2)return;qv+=k}else{if((a||'').length>=6)return;qv=(qv=='0'?'':qv)+k}}qUpd()});
@@ -709,9 +791,9 @@ const shake=el=>{el.classList.remove('shake');void el.offsetWidth;el.classList.a
 $('qsS').onclick=()=>{if(qbusy)return;const v=num(qv);if(!(v>0))return shake($('qsA'));if(!qcat)return shake($('qsC'));
  qbusy=true;let id;
  if(qEdit&&S.entries.includes(qEdit)){const e=qEdit;id=e.id;
-  if(qcat=='sonst'){if(qnote)e.note=qnote;else delete e.note}else if(e.cat=='sonst')delete e.note;
+  if(isN(qcat)){if(qnote)e.note=qnote;else delete e.note}else delete e.note;
   e.amt=v;e.cat=qcat;save()}
- else{id=Date.now()+''+Math.random().toString(36).slice(2,6);const en={id,amt:v,cat:qcat,ts:Date.now()};if(qcat=='sonst'&&qnote)en.note=qnote;S.entries.push(en);save()}
+ else{id=Date.now()+''+Math.random().toString(36).slice(2,6);const en={id,amt:v,cat:qcat,ts:Date.now()};if(isN(qcat)&&qnote)en.note=qnote;S.entries.push(en);save()}
  $('qsS').classList.add('ok');$('qsS').textContent='✓ Gespeichert';
  setTimeout(()=>{closeQ();if(page!=0)goPage(0);render({newId:id})},600)};
 document.addEventListener('keydown',e=>{if(!$('qs').classList.contains('on')||$('ns').classList.contains('on'))return;const m={Backspace:'del',',':',','.':','};const k=m[e.key]||(/^[0-9]$/.test(e.key)?e.key:null);
@@ -729,7 +811,7 @@ function openD(){renderFixed();$('dq').classList.add('on');$('dq').setAttribute(
 function closeD(){$('ds').classList.remove('on');$('dq').classList.remove('on');$('dq').setAttribute('aria-hidden','true')}
 $('fxOpen').onclick=()=>{if(!(S.fixed||[]).length)openF();else openD()};$('dsX').onclick=closeD;$('dqDim').onclick=closeD;
 function renderFixed(){const fx=S.fixed||[];
- $('fxl').innerHTML=fx.map(f=>{const c=ALL.find(c=>c.id==f.cat)||ALL[5];return `<li><button type="button" data-f="${f.id}"><i style="background:${c.c}"></i><span><b>${esc(f.name)}</b><small>seit ${mName(f.from,{month:'short',year:'numeric'})}</small></span><span class="a">${eur.format(f.amt)}</span>${fxChev}</button></li>`}).join('');
+ $('fxl').innerHTML=fx.map(f=>{const c=catOf(f.cat);return `<li><button type="button" data-f="${f.id}"><i style="background:${c.c}"></i><span><b>${esc(f.name)}</b><small>seit ${mName(f.from,{month:'short',year:'numeric'})}</small></span><span class="a">${eur.format(f.amt)}</span>${fxChev}</button></li>`}).join('');
  const t=fx.reduce((a,f)=>a+f.amt,0);$('fxSum').hidden=!fx.length;$('fxTot').textContent=eur.format(t);
  const inM=month().filter(e=>e.fixed).reduce((a,e)=>a+e.amt,0);
  $('fxS').textContent=fx.length?`${fx.length} aktiv · pro Monat`:'Abos & Versicherungen hinzufügen';$('fxA').textContent=fx.length?eur.format(t):'';
@@ -762,7 +844,7 @@ $('fsP').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
  if(k=='del')fv=fv.slice(0,-1);else if(k==','){if(!fv.includes(','))fv=(fv||'0')+','}
  else{const [a,c]=fv.split(',');if(c!==undefined){if(c.length>=2)return;fv+=k}else{if((a||'').length>=6)return;fv=(fv=='0'?'':fv)+k}}fUpd()});
 
-function render(o={}){
+function render(o={}){syncCats();
  applyFixed();
  const tot=spent(),left=S.budget-tot;
  if(!S.budget){if(view!='E')show('S');return}
@@ -780,7 +862,7 @@ function render(o={}){
  const rows=ALL.map(c=>({...c,v:month().filter(e=>e.cat==c.id).reduce((a,e)=>a+e.amt,0)})).sort((a,b)=>b.v-a.v);
  $('leg').innerHTML=rows.map(r=>`<li class="${r.v?'':'zero'}"><i style="background:${r.c}"></i><span>${r.n}</span><span>${eur.format(r.v)}</span></li>`).join('');
  const list=month().sort((a,b)=>b.ts-a.ts).slice(0,8);
- $('hist').innerHTML=list.length?list.map(e=>{const c=ALL.find(c=>c.id==e.cat)||ALL[5],d=new Date(e.ts);
+ $('hist').innerHTML=list.length?list.map(e=>{const c=catOf(e.cat),d=new Date(e.ts);
   return `<li class="${e.id==o.newId?'new':''}"><div>${e.note?esc(e.note):c.n}<small>${e.fixed?'↻ Dauerbetrag · ':(e.note?c.n+' · ':'')}${d.toLocaleDateString('de-DE',{day:'numeric',month:'short'})}, ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</small></div><span class="a">${eur.format(e.amt)}</span><button class="x" data-id="${e.id}" aria-label="Eintrag löschen">×</button></li>`}).join('')
   :'<li class="empty">Noch nichts eingetragen. Tippe auf + oder nutze ein Widget.</li>';
  if(o.newId){const n=$('hist').querySelector('.new .a');if(n)requestAnimationFrame(()=>requestAnimationFrame(()=>n.style.color='inherit'))}
@@ -789,6 +871,7 @@ function render(o={}){
 window.goBack=()=>{
  if($('ns').classList.contains('on')){$('nsX').click();return true}
  if($('qs').classList.contains('on')){closeQ();return true}
+ if($('kq').classList.contains('on')){closeK();return true}
  if($('fq').classList.contains('on')){closeF();return true}
  if($('dq').classList.contains('on')){closeD();return true}
  if($('wq').classList.contains('on')){closeW();return true}

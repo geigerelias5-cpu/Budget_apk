@@ -78,8 +78,8 @@ button:focus{outline:none}
   </div>
 </div>
 
-<div class="ns" id="ns" role="dialog" aria-label="Sonstiges beschreiben">
-  <h4>Sonstiges – wofür?</h4>
+<div class="ns" id="ns" role="dialog" aria-label="Notiz">
+  <h4 id="nsT">Sonstiges – wofür?</h4>
   <p>Kurz notieren, damit du es später wiederfindest.</p>
   <input id="nsI" maxlength="40" placeholder="z. B. Geschenk für Lea" autocomplete="off" enterkeyhint="done">
   <div class="r2"><button class="no2" id="nsX">Abbrechen</button><button class="ok2" id="nsO">Übernehmen</button></div>
@@ -91,17 +91,21 @@ const $=id=>document.getElementById(id);
 let S,s='',sel=null,busy=false,note='';
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-$('cats').innerHTML=CATS.map(c=>`<button class="cat" data-c="${c.id}" aria-pressed="false"><i style="background:${c.w||c.c}"></i>${c.n}</button>`).join('');
+const catOf=id=>CATS.find(c=>c.id==id);
+const isN=id=>!!(catOf(id)||{}).q;
+let nsc=null,catSig='';
+function buildCats(){const sig=JSON.stringify(CATS);if(sig===catSig)return;catSig=sig;
+ $('cats').innerHTML=CATS.map(c=>`<button class="cat" data-c="${c.id}" aria-pressed="false"><i style="background:${wcol(c)}"></i>${esc(c.n)}</button>`).join('')}
 $('pad').innerHTML=['1','2','3','4','5','6','7','8','9','del','0',','].map(k=>k=='del'
  ?`<button class="del" data-k="del" aria-label="Löschen">⌫</button>`:`<button data-k="${k}">${k}</button>`).join('');
 
-function selectCat(id){sel=id||null;if(sel!='sonst')note='';
- for(const b of $('cats').children){b.setAttribute('aria-pressed',b.dataset.c==sel);
-  if(b.dataset.c=='sonst')b.innerHTML=`<i style="background:#c4c4bf"></i><span class="nt">${note?esc(note):'Sonstiges'}</span>`}}
-function openN(){$('nsI').value=note;$('ns').classList.add('on');setTimeout(()=>$('nsI').focus(),350)}
+function selectCat(id){sel=catOf(id)?id:null;if(!isN(sel))note='';
+ for(const b of $('cats').children){b.setAttribute('aria-pressed',b.dataset.c==sel);const c=catOf(b.dataset.c);
+  if(c&&c.q)b.innerHTML=`<i style="background:${wcol(c)}"></i><span class="nt">${note&&sel==c.id?esc(note):esc(c.n)}</span>`}}
+function openN(id){nsc=id||sel;$('nsT').textContent=(catOf(nsc)||{n:''}).n+' – wofür?';$('nsI').value=sel==nsc?note:'';$('ns').classList.add('on');setTimeout(()=>$('nsI').focus(),350)}
 function closeN(){$('ns').classList.remove('on');$('nsI').blur()}
-$('nsO').onclick=()=>{note=$('nsI').value.trim();selectCat('sonst');closeN()};
-$('nsX').onclick=()=>{closeN();if(!note&&sel=='sonst')selectCat(null)};
+$('nsO').onclick=()=>{note=$('nsI').value.trim();sel=nsc;selectCat(nsc);closeN()};
+$('nsX').onclick=()=>{closeN();if(!note&&isN(sel))selectCat(null)};
 $('nsI').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('nsO').click()}});
 function upd(bump){const v=$('val');
  if(!s){v.textContent='0,00';v.classList.add('ph')}else{v.classList.remove('ph');
@@ -111,7 +115,7 @@ function upd(bump){const v=$('val');
 function leftNow(){const tot=S.entries.filter(inMonth).reduce((a,e)=>a+e.amt,0)+fixedPending(S);return S.budget-tot}
 function showLeft(){const l=leftNow(),b=$('left');b.textContent=eur0(l);b.classList.toggle('neg',l<0)}
 
-$('cats').addEventListener('click',e=>{const b=e.target.closest('.cat');if(!b)return;selectCat(b.dataset.c);if(b.dataset.c=='sonst')openN()});
+$('cats').addEventListener('click',e=>{const b=e.target.closest('.cat');if(!b)return;selectCat(b.dataset.c);if(isN(b.dataset.c))openN(b.dataset.c)});
 $('pad').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||busy)return;const k=b.dataset.k;
  if(k=='del')s=s.slice(0,-1);
  else if(k==','){if(!s.includes(','))s=(s||'0')+','}
@@ -122,7 +126,7 @@ $('pad').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||
 
 function shake(id){const el=$(id);el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')}
 $('go').onclick=()=>{if(busy)return;const v=num(s);if(!(v>0))return shake('amt');if(!sel)return shake('cats');
- busy=true;S=loadState();const en={id:newId(),amt:v,cat:sel,ts:Date.now()};if(sel=='sonst'&&note)en.note=note;S.entries.push(en);saveState(S);showLeft();
+ busy=true;S=loadState();const en={id:newId(),amt:v,cat:sel,ts:Date.now()};if(isN(sel)&&note)en.note=note;S.entries.push(en);saveState(S);showLeft();
  $('go').classList.add('ok');$('goT').textContent='✓ Gespeichert';
  setTimeout(()=>dismiss(),650)};
 
@@ -131,10 +135,10 @@ $('nobGo').onclick=()=>{if(NATIVE)Android.openApp()};
 $('dim').onclick=()=>dismiss();
 
 window.dismiss=()=>{if($('ns').classList.contains('on')){$('nsX').click();return true}document.body.classList.remove('open');setTimeout(()=>{if(NATIVE)Android.close()},380);return true};
-window.reopen=()=>{S=loadState();s='';busy=false;note='';closeN();
+window.reopen=()=>{S=loadState();buildCats();s='';busy=false;note='';closeN();
  $('go').classList.remove('ok');$('goT').textContent='Speichern';
  const has=S.budget>0;$('form').hidden=!has;$('nob').hidden=has;
- const sc=NATIVE?Android.startCategory():'';selectCat(sc);upd(false);if(has)showLeft();if(has&&sc=='sonst')setTimeout(openN,400);
+ const sc=NATIVE?Android.startCategory():'';selectCat(sc);upd(false);if(has)showLeft();if(has&&isN(sc))setTimeout(()=>openN(sc),400);
  document.body.classList.remove('open');void document.body.offsetWidth;
  requestAnimationFrame(()=>document.body.classList.add('open'))};
 

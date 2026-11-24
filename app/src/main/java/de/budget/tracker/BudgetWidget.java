@@ -29,9 +29,10 @@ public class BudgetWidget extends AppWidgetProvider {
 
     static final int LARGE = 0, COMPACT = 1, SLIM = 2, RING = 3;
 
+    /** 2 Reihen à 4 Plätze; benutzt werden so viele, wie es Kategorien gibt. */
     private static final int[] CHIP_IDS = {
-            R.id.c_essen, R.id.c_einkauf, R.id.c_transport,
-            R.id.c_freizeit, R.id.c_wohnen, R.id.c_sonst
+            R.id.k0, R.id.k1, R.id.k2, R.id.k3,
+            R.id.k4, R.id.k5, R.id.k6, R.id.k7
     };
 
     @Override
@@ -111,15 +112,22 @@ public class BudgetWidget extends AppWidgetProvider {
 
         if (type != LARGE) return v;
 
-        for (int i = 0; i < CHIP_IDS.length; i++) {
-            String label = "●  " + Store.CAT_NAMES[i];
-            SpannableString s = new SpannableString(label);
-            s.setSpan(new ForegroundColorSpan(Store.CAT_COLORS[i]), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            v.setTextViewText(CHIP_IDS[i], s);
-            v.setOnClickPendingIntent(CHIP_IDS[i], left == null
+        Store.Cat[] cats = Store.cats(Store.read(c));
+        int n = cats.length;
+        int perRow = n <= 4 ? n : (n + 1) / 2;
+        for (int slot = 0; slot < CHIP_IDS.length; slot++) v.setViewVisibility(CHIP_IDS[slot], View.GONE);
+        v.setViewVisibility(R.id.krow1, n > 4 ? View.VISIBLE : View.GONE);
+        for (int i = 0; i < n; i++) {
+            int slot = (i / perRow) * 4 + (i % perRow);
+            int id = CHIP_IDS[slot];
+            SpannableString s = new SpannableString("●  " + cats[i].name);
+            s.setSpan(new ForegroundColorSpan(cats[i].color), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            v.setViewVisibility(id, View.VISIBLE);
+            v.setTextViewText(id, s);
+            v.setOnClickPendingIntent(id, left == null
                     ? PendingIntent.getActivity(c, 300 + i, open,
                         PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT)
-                    : quick(c, Store.CAT_IDS[i], 210 + i));
+                    : quick(c, cats[i].id, 210 + i));
         }
         return v;
     }
@@ -177,7 +185,7 @@ public class BudgetWidget extends AppWidgetProvider {
             if (val <= 0) continue;
             float sweep = (float) (val / base * 360.0);
             float gap = sweep > 4f ? 1.6f : 0f;
-            p.setColor(i == 6 ? Store.FIX_COLOR : Store.CAT_COLORS[i]);
+            p.setColor(i == mo.cats.length ? Store.FIX_COLOR : mo.cats[i].color);
             cv.drawArc(r, start, Math.max(sweep - gap, 0.5f), false, p);
             start += sweep;
         }

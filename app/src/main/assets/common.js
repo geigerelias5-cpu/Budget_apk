@@ -1,19 +1,22 @@
 /* Gemeinsame Daten-Logik für App und Schnelleingabe */
-window.CATS = [
+window.DEFCATS = [
   {id:'essen',     n:'Essen',     c:'#d71921'},
-  {id:'einkauf',   n:'Brotzeit',  c:'var(--ink)', w:'#f2f2f2'},
+  {id:'einkauf',   n:'Einkauf',   c:'light-dark(#111,#f2f2f2)'},
   {id:'transport', n:'Sprit',     c:'#8a8a8a'},
   {id:'freizeit',  n:'Freizeit',  c:'#f08c90'},
   {id:'wohnen',    n:'Versicherung', c:'#4d4d4d'},
-  {id:'sonst',     n:'Sonstiges', c:'#c4c4bf'}
+  {id:'sonst',     n:'Sonstiges', c:'#c4c4bf', q:1}
 ];
+window.CATS = DEFCATS;
+/* Farbe auf dunklem Grund */
+window.wcol = c => /light-dark|var\(/.test(c.c) ? '#f2f2f2' : c.c;
 window.NATIVE = typeof window.Android !== 'undefined';
 window.KEY = 'budget-proto-v1';
 
 window.loadState = function(){
   try{
     const raw = NATIVE ? Android.getData() : localStorage.getItem(KEY);
-    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)){ window.__SD = Math.min(28, Math.max(1, Math.round(s.startDay || 1))); return s; } }
+    if(raw){ const s = JSON.parse(raw); if(s && Array.isArray(s.entries)){ window.CATS = Array.isArray(s.cats) && s.cats.length ? s.cats : DEFCATS; window.__SD = Math.min(28, Math.max(1, Math.round(s.startDay || 1))); return s; } }
   }catch(e){}
   return {budget:0, entries:[]};
 };

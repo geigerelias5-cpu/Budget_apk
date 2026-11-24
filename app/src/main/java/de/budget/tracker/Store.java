@@ -15,16 +15,58 @@ final class Store {
     private static final String PREFS = "budget";
     private static final String KEY = "state";
 
+    /** Standard-Kategorien, solange in den Einstellungen nichts geändert wurde. */
     static final String[] CAT_IDS = {"essen", "einkauf", "transport", "freizeit", "wohnen", "sonst"};
-    static final String[] CAT_NAMES = {"Essen", "Brotzeit", "Sprit", "Freizeit", "Versicherung", "Sonstiges"};
+    static final String[] CAT_NAMES = {"Essen", "Einkauf", "Sprit", "Freizeit", "Versicherung", "Sonstiges"};
     static final int[] CAT_COLORS = {0xFFD71921, 0xFFF2F2F2, 0xFF8A8A8A, 0xFFF08C90, 0xFF6B6B6B, 0xFFC4C4BF};
-    /** Farbe der eigenen Kategorie „Dauerbeträge“ (Index 6 in byCat). */
+    /** Farbe der eigenen Kategorie „Dauerbeträge“ (letzter Platz in byCat). */
     static final int FIX_COLOR = 0xFF8C1016;
+    static final int MAX_CATS = 8;
 
-    /** Zahlen des laufenden Monats. byCat: 6 Kategorien + Dauerbeträge. */
+    static final class Cat {
+        final String id, name;
+        final int color;
+        final boolean note;
+        Cat(String id, String name, int color, boolean note) {
+            this.id = id; this.name = name; this.color = color; this.note = note;
+        }
+    }
+
+    /** Kategorien aus den Einstellungen (Feld "cats"), sonst die Standardliste. */
+    static Cat[] cats(String json) {
+        try {
+            JSONArray a = new JSONObject(json).optJSONArray("cats");
+            if (a != null && a.length() > 0) {
+                int n = Math.min(a.length(), MAX_CATS);
+                Cat[] out = new Cat[n];
+                for (int i = 0; i < n; i++) {
+                    JSONObject o = a.getJSONObject(i);
+                    out[i] = new Cat(o.optString("id"), o.optString("n", "?"),
+                            color(o.optString("c", "")), o.optInt("q", 0) == 1 || o.optBoolean("q", false));
+                }
+                return out;
+            }
+        } catch (Exception ignored) {
+        }
+        Cat[] d = new Cat[CAT_IDS.length];
+        for (int i = 0; i < d.length; i++) d[i] = new Cat(CAT_IDS[i], CAT_NAMES[i], CAT_COLORS[i], "sonst".equals(CAT_IDS[i]));
+        return d;
+    }
+
+    /** CSS-Farbe → Android-Farbe auf dunklem Grund ("light-dark(...)" = Schwarz/Weiß → hell). */
+    static int color(String css) {
+        try {
+            if (css.startsWith("#")) return android.graphics.Color.parseColor(css);
+        } catch (Exception ignored) {
+        }
+        return 0xFFF2F2F2;
+    }
+
+    /** Zahlen des laufenden Monats. byCat: alle Kategorien + Dauerbeträge am Ende. */
     static final class Month {
         double budget, spent;
-        final double[] byCat = new double[7];
+        Cat[] cats;
+        double[] byCat;
     }
 
     private Store() {}
@@ -195,6 +237,8 @@ final class Store {
             if (budget <= 0) return null;
             Month m = new Month();
             m.budget = budget;
+            m.cats = cats(o.toString());
+            m.byCat = new double[m.cats.length + 1];
             int sd = startDay(o.toString());
             String ym = periodKey(System.currentTimeMillis(), sd);
             java.util.HashSet<String> fixedSeen = new java.util.HashSet<>();
@@ -207,7 +251,7 @@ final class Store {
                     m.spent += amt;
                     String fixedId = e.optString("fixed", "");
                     if (!fixedId.isEmpty()) fixedSeen.add(fixedId);
-                    m.byCat[catIndex(fixedId.isEmpty() ? e.optString("cat") : "fix")] += amt;
+                    m.byCat[fixedId.isEmpty() ? catIndex(m.cats, e.optString("cat")) : m.cats.length] += amt;
                 }
             }
             JSONArray fixed = o.optJSONArray("fixed");
@@ -223,7 +267,7 @@ final class Store {
                     if (skipped) continue;
                     double amt = f.optDouble("amt", 0);
                     m.spent += amt;
-                    m.byCat[6] += amt;
+                    m.byCat[m.cats.length] += amt;
                 }
             }
             return m;
@@ -232,10 +276,11 @@ final class Store {
         }
     }
 
-    static int catIndex(String id) {
-        if ("fix".equals(id)) return 6;
-        for (int i = 0; i < CAT_IDS.length; i++) if (CAT_IDS[i].equals(id)) return i;
-        return 5;
+    static int catIndex(Cat[] cats, String id) {
+        if ("fix".equals(id)) return cats.length;
+        for (int i = 0; i < cats.length; i++) if (cats[i].id.equals(id)) return i;
+        for (int i = 0; i < cats.length; i++) if (cats[i].note) return i;
+        return cats.length - 1;
     }
 
     static String euro(double v) {
