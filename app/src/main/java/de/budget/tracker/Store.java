@@ -252,6 +252,8 @@ final class Store {
                     JSONObject e = arr.getJSONObject(i);
                     if (!ym.equals(periodKey(e.optLong("ts"), sd))) continue;
                     double amt = e.optDouble("amt", 0);
+                    // Einnahme: erhöht das Budget dieses Monats, ist keine Ausgabe
+                    if ("in".equals(e.optString("cat"))) { m.budget += amt; continue; }
                     m.spent += amt;
                     String fixedId = e.optString("fixed", "");
                     if (!fixedId.isEmpty()) fixedSeen.add(fixedId);

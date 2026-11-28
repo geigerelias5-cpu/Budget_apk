@@ -8,7 +8,7 @@ iPhone? → [Web-App für iPhone](https://geigerelias5-cpu.github.io/Budget-web/
 
 ## Funktionen
 
-- **Kreisdiagramm** mit Restbetrag und Ausgaben nach Kategorie – Kategorien frei einstellbar: Name, Farbe, Reihenfolge, bis zu 8 Stück
+- **Kreisdiagramm** mit Restbetrag und Ausgaben nach Kategorie – Einnahmen eintragen erhöht das Monatsbudget – Kategorien frei einstellbar: Name, Farbe, Reihenfolge, bis zu 8 Stück
 - **Widgets** für den Startbildschirm in vier Größen (2×1, 2×2 rund, 4×1, 4×2) – mit „+“ zum schnellen Eintragen
 - **Verlauf**: alle Monate mit Diagramm, im Budget geblieben oder drüber
 - **Dauerbeträge** für Abos und Versicherungen, zählen jeden Monat automatisch

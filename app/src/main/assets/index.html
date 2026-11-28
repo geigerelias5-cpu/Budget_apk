@@ -319,6 +319,17 @@ button{transition:transform .15s}button:active:not(:disabled){transform:scale(.9
 .kpos button:disabled{opacity:.3}
 #ks .del{display:block;margin:10px auto 0;border:0;background:none;color:var(--red);font:500 14px "Hanken Grotesk",sans-serif;cursor:pointer;min-height:40px}
 #ks .del:disabled{color:#555}
+/* Einnahmen */
+.qmode{display:flex;gap:3px;background:#141414;border:1px solid #ffffff14;border-radius:999px;padding:3px;margin:0 0 10px}
+.qmode button{flex:1;border:0;background:none;color:#8a8a8a;font:500 14px "Hanken Grotesk",sans-serif;height:34px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s}
+.qmode button[aria-pressed="true"]{background:#f2f2f2;color:#000}
+.qin{width:100%;box-sizing:border-box;height:48px;border:1px solid #ffffff24;border-radius:16px;background:#141414;color:#f2f2f2;font:500 16px "Hanken Grotesk",sans-serif;padding:0 14px;margin:2px 0 6px}
+.qin:focus{outline:none;border-color:#f2f2f2}
+.qhint{margin:0 4px 10px;color:#8a8a8a;font-size:13px}
+.hist li.inc .a{color:#3aa76d}
+.md li.inc i{background:#3aa76d}
+.md li.inc span:last-child,.md li.inc~li.sub span:last-child{color:#3aa76d}
+.md li.inc~li.sub i{border-color:#3aa76d}
 [hidden]{display:none!important}
 footer{text-align:center;color:var(--mut);font-size:13px;padding:0 16px 32px}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
@@ -414,9 +425,12 @@ button:focus{outline:none}
       <div class="qs" id="qs" aria-hidden="true">
         <div class="dim" id="qsDim"></div>
         <div class="sh" role="dialog" aria-label="Ausgabe eintragen">
+          <div class="qmode" id="qsM" role="group" aria-label="Art"><button type="button" data-m="out" aria-pressed="true">Ausgabe</button><button type="button" data-m="in" aria-pressed="false">Einnahme</button></div>
           <div class="hd"><span id="qsH">Ausgabe eintragen</span><span>übrig <b id="qsL">–</b></span></div>
           <div class="amtq" id="qsA"><span class="v ph" id="qsV">0,00</span><span class="u">€</span></div>
           <div class="qc" id="qsC" role="group" aria-label="Kategorie"></div>
+          <input class="qin" id="qsN" maxlength="40" placeholder="Wofür? z. B. Geschenk, Verkauf (optional)" autocomplete="off" enterkeyhint="done" hidden>
+          <p class="qhint" id="qsI" hidden>Erhöht dein Budget für diesen Monat.</p>
           <div class="pad" id="qsP"></div>
           <button class="sv" id="qsS" disabled>Speichern</button>
         </div>
@@ -522,10 +536,14 @@ const pStart=k=>{const [y,m]=k.split('-').map(Number);return new Date(y,m-1,SD()
 const pEnd=k=>{const [y,m]=k.split('-').map(Number);return new Date(y,m,SD())};
 const curYM=()=>pk(now());
 const inMonth=e=>pk(e.ts)==curYM();
-const month=()=>S.entries.filter(inMonth);
+/* Einnahmen: Einträge mit cat 'in' erhöhen das Budget des Monats, sind aber keine Ausgabe */
+const isIn=e=>e.cat=='in';
+const month=()=>S.entries.filter(e=>inMonth(e)&&!isIn(e));
+const incM=()=>S.entries.filter(e=>isIn(e)&&inMonth(e)).reduce((a,e)=>a+e.amt,0);
+const B=()=>(S.budget||0)+incM();
 const daysLeft=()=>{const n=now(),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.max(1,Math.round((pEnd(curYM())-t)/864e5))};
 /* Tagesbudget: Rest zu Tagesbeginn ÷ verbleibende Tage, minus was heute schon ausgegeben wurde */
-const spentToday=()=>{const n=now(),t0=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime();return S.entries.filter(e=>!e.fixed&&e.ts>=t0&&inMonth(e)).reduce((a,e)=>a+e.amt,0)};
+const spentToday=()=>{const n=now(),t0=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime();return S.entries.filter(e=>!e.fixed&&!isIn(e)&&e.ts>=t0&&inMonth(e)).reduce((a,e)=>a+e.amt,0)};
 const todayLeft=left=>{const st=spentToday(),v=(left+st)/daysLeft()-st;return Math.sign(v)*Math.floor(Math.abs(v)*100)/100};
 const fmtDM=d=>d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit'});
 const pRange=k=>`${fmtDM(pStart(k))} – ${fmtDM(new Date(pEnd(k)-864e5))}`;
@@ -669,7 +687,7 @@ const RR=40,CC=2*Math.PI*RR;let fresh=true;
 function buildRing(){$('ring').innerHTML=`<circle cx="50" cy="50" r="${RR}" fill="none" stroke-dasharray="0.01 3.12" stroke-linecap="round" style="stroke:var(--mut);stroke-width:2.4;opacity:.5"/>`+
  ALL.map(c=>`<circle class="arc" id="seg-${c.id}" cx="50" cy="50" r="${RR}" fill="none" stroke-width="11" style="stroke:${c.c};stroke-dasharray:0 ${CC};stroke-dashoffset:0"><title></title></circle>`).join('')}
 buildRing();catBuilders.push(buildRing);
-function ring(){const tot=spent(),base=Math.max(S.budget||1,tot);let off=0;const segs=ALL.map(c=>$('seg-'+c.id));
+function ring(){const tot=spent(),base=Math.max(B()||1,tot);let off=0;const segs=ALL.map(c=>$('seg-'+c.id));
  if(fresh){for(const g of segs){g.style.transition='none';g.style.strokeDasharray=`0 ${CC}`;g.style.strokeDashoffset='0'}void $('ring').getBoundingClientRect();for(const g of segs)g.style.transition=''}
  fresh=false;
  ALL.forEach((c,i)=>{const v=month().filter(e=>e.cat==c.id).reduce((a,e)=>a+e.amt,0),len=v/base*CC,gap=len>1.2?.8:0,g=segs[i];
@@ -706,9 +724,9 @@ function monthsData(){const k0=curYM(),map={};
  for(const e of S.entries){const k=pk(e.ts);(map[k]=map[k]||[]).push(e)}
  map[k0]=map[k0]||[];
  const keys=Object.keys(map).sort().reverse();
- return keys.map(k=>{const es=map[k],sp=es.reduce((a,e)=>a+e.amt,0),by={};for(const e of es)by[e.cat]=(by[e.cat]||0)+e.amt;
+ return keys.map(k=>{const all=map[k],es=all.filter(e=>!isIn(e)),ins=all.filter(isIn).sort((a,b)=>b.ts-a.ts),sp=es.reduce((a,e)=>a+e.amt,0),inc=ins.reduce((a,e)=>a+e.amt,0),by={};for(const e of es)by[e.cat]=(by[e.cat]||0)+e.amt;
   const fx=es.filter(e=>e.fixed).sort((a,b)=>b.amt-a.amt);
-  return {k,cur:k==k0,spent:sp,budget:budgetFor(k),by,n:es.length,fx}})}
+  return {k,cur:k==k0,spent:sp,budget:budgetFor(k)+inc,inc,ins,by,n:es.length,fx}})}
 const mName=(k,o={month:'long',year:'numeric'})=>new Date((+pStart(k)+ +pEnd(k))/2).toLocaleDateString('de-DE',o);
 const mShort=k=>mName(k,{month:'short'}).replace('.','');
 let barTargets=[],chartRows=[];
@@ -750,7 +768,8 @@ function renderHistory(){const ms=monthsData(),k0=curYM();
   const seg=ALL.filter(c=>m.by[c.id]).map(c=>`<i style="width:${m.by[c.id]/base*100}%;background:${c.c}"></i>`).join('');
   const st=m.cur?(over?`<span class="over">${eur0(-left)} über Budget</span>`:`noch ${eur0(left)} übrig`):(over?`<span class="over">${eur0(-left)} über Budget</span>`:`${eur0(left)} gespart`);
   const det=ALL.map(c=>({...c,v:m.by[c.id]||0})).filter(c=>c.id!='fix'||c.v).sort((a,b)=>b.v-a.v).map(c=>`<li class="${c.v?'':'zero'}"><i style="background:${c.c}"></i><span>${c.n}</span><span>${eur.format(c.v)}</span></li>`
-   +(c.id=='fix'?m.fx.map(e=>`<li class="sub"><i></i><span>${esc(e.note||'Dauerbetrag')}</span><span>${eur.format(e.amt)}</span></li>`).join(''):'')).join('');
+   +(c.id=='fix'?m.fx.map(e=>`<li class="sub"><i></i><span>${esc(e.note||'Dauerbetrag')}</span><span>${eur.format(e.amt)}</span></li>`).join(''):'')).join('')
+   +(m.inc?`<li class="inc"><i></i><span>Einnahmen</span><span>+${eur.format(m.inc)}</span></li>`+m.ins.map(e=>`<li class="sub"><i></i><span>${esc(e.note||'Einnahme')}</span><span>+${eur.format(e.amt)}</span></li>`).join(''):'');
   return `<li class="mc${open.has(m.k)?' open':''}" data-k="${m.k}"><button aria-expanded="${open.has(m.k)}"><div class="mh"><b>${mName(m.k)}${m.cur?'<em>läuft</em>':''}${SD()>1?`<small class="rg">${pRange(m.k)}</small>`:''}</b><span>${eur0(Math.round(m.spent*100)/100)} / ${eur0(m.budget)}</span></div>
    <div class="mbar">${seg}</div><div class="ms">${st}${chev}</div></button>
    <div class="md"><div><ul>${det}</ul><p>${m.n} ${m.n==1?'Eintrag':'Einträge'}</p></div></div></li>`}).join('');
@@ -779,10 +798,15 @@ function closeN(){$('ns').classList.remove('on');$('nsI').blur()}
 $('nsO').onclick=()=>{qnote=$('nsI').value.trim();qSel(nsc);closeN()};
 $('nsX').onclick=()=>{closeN();if(!qnote)qSel(null)};
 $('nsI').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('nsO').click()}else if(e.key=='Escape'){e.stopPropagation();$('nsX').click()}});
-let qEdit=null;
-function openQ(cat,amount,edit){qEdit=edit||null;qv=amount||'';qbusy=false;qnote='';closeN();qSel(cat||null);
+let qEdit=null,qIn=false;
+function qMode(inc){qIn=inc;for(const b of $('qsM').children)b.setAttribute('aria-pressed',(b.dataset.m=='in')==inc);
+ $('qsC').hidden=inc;$('qsN').hidden=!inc;$('qsI').hidden=!inc;
+ $('qsH').textContent=(inc?'Einnahme':'Ausgabe')+(qEdit?' bearbeiten':' eintragen');qUpd()}
+$('qsM').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(b&&!qbusy)qMode(b.dataset.m=='in')});
+$('qsN').addEventListener('keydown',e=>{if(e.key=='Enter'){e.preventDefault();e.stopPropagation();$('qsN').blur()}});
+function openQ(cat,amount,edit){qEdit=edit||null;qv=amount||'';qbusy=false;qnote='';closeN();const inc=cat=='in';qSel(inc?null:cat||null);
  if(edit&&isN(cat)&&edit.note){qnote=edit.note;qSel(cat)}
- $('qsH').textContent=edit?'Ausgabe bearbeiten':'Ausgabe eintragen';qUpd();const l=S.budget-spent();$('qsL').textContent=eur0(l);$('qsL').classList.toggle('neg',l<0);
+ $('qsN').value=inc&&edit?edit.note||'':'';qMode(inc);qUpd();const l=B()-spent();$('qsL').textContent=eur0(l);$('qsL').classList.toggle('neg',l<0);
  $('qsS').classList.remove('ok');$('qsS').textContent='Speichern';$('qs').classList.add('on');$('qs').setAttribute('aria-hidden','false')}
 function closeQ(){$('qs').classList.remove('on');$('qs').setAttribute('aria-hidden','true')}
 $('qsDim').onclick=closeQ;
@@ -791,15 +815,15 @@ $('qsP').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||
  if(k=='del')qv=qv.slice(0,-1);else if(k==','){if(!qv.includes(','))qv=(qv||'0')+','}
  else{const [a,c]=qv.split(',');if(c!==undefined){if(c.length>=2)return;qv+=k}else{if((a||'').length>=6)return;qv=(qv=='0'?'':qv)+k}}qUpd()});
 const shake=el=>{el.classList.remove('shake');void el.offsetWidth;el.classList.add('shake')};
-$('qsS').onclick=()=>{if(qbusy)return;const v=num(qv);if(!(v>0))return shake($('qsA'));if(!qcat)return shake($('qsC'));
- qbusy=true;let id;
+$('qsS').onclick=()=>{if(qbusy)return;const v=num(qv);if(!(v>0))return shake($('qsA'));if(!qIn&&!qcat)return shake($('qsC'));
+ qbusy=true;let id;const cat=qIn?'in':qcat,note=qIn?$('qsN').value.trim():(isN(qcat)?qnote:'');
  if(qEdit&&S.entries.includes(qEdit)){const e=qEdit;id=e.id;
-  if(isN(qcat)){if(qnote)e.note=qnote;else delete e.note}else delete e.note;
-  e.amt=v;e.cat=qcat;save()}
- else{id=Date.now()+''+Math.random().toString(36).slice(2,6);const en={id,amt:v,cat:qcat,ts:Date.now()};if(isN(qcat)&&qnote)en.note=qnote;S.entries.push(en);save()}
+  if(note)e.note=note;else delete e.note;
+  e.amt=v;e.cat=cat;save()}
+ else{id=Date.now()+''+Math.random().toString(36).slice(2,6);const en={id,amt:v,cat,ts:Date.now()};if(note)en.note=note;S.entries.push(en);save()}
  $('qsS').classList.add('ok');$('qsS').textContent='✓ Gespeichert';
  setTimeout(()=>{closeQ();if(page!=0)goPage(0);render({newId:id})},600)};
-document.addEventListener('keydown',e=>{if(!$('qs').classList.contains('on')||$('ns').classList.contains('on'))return;const m={Backspace:'del',',':',','.':','};const k=m[e.key]||(/^[0-9]$/.test(e.key)?e.key:null);
+document.addEventListener('keydown',e=>{if(!$('qs').classList.contains('on')||$('ns').classList.contains('on')||document.activeElement==$('qsN'))return;const m={Backspace:'del',',':',','.':','};const k=m[e.key]||(/^[0-9]$/.test(e.key)?e.key:null);
  if(k){$('qsP').querySelector(`[data-k="${k}"]`).click();e.preventDefault()}else if(e.key=='Enter')$('qsS').click();else if(e.key=='Escape')closeQ()});
 /* Dauerbeträge */
 function applyFixed(){const k0=curYM();let ch=false;S.fixed=S.fixed||[];
@@ -849,24 +873,24 @@ $('fsP').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
 
 function render(o={}){syncCats();
  applyFixed();
- const tot=spent(),left=S.budget-tot;
+ const tot=spent(),left=B()-tot,inc=incM();
  if(!S.budget){if(view!='E')show('S');return}
  if(view=='S')show('M');
  $('mM').textContent=SD()>1?`${mName(curYM(),{month:'long'})} · ${pRange(curYM()).replace(' – ','–')}`:mName(curYM());
  const wasOver=$('mid').classList.contains('over');
- countTo($('mL'),Math.abs(left),eur0);$('mS').textContent=left<0?'über Budget':'übrig von '+eur0(S.budget);
+ countTo($('mL'),Math.abs(left),eur0);$('mS').textContent=left<0?'über Budget':'übrig von '+eur0(B());
  {const t=todayLeft(left);
   $('mPd').classList.toggle('over',left<0||t<0);
   $('mPd').innerHTML=left<0?'<b>Budget aufgebraucht</b>':t>=0?`Heute noch <b>${eur.format(t)}</b> übrig`:`Heute <b>${eur.format(-t)}</b> über dem Tagesbudget`}
  $('mid').classList.toggle('over',left<0);
  if(wasOver!=(left<0)||o.newId){const m=$('mid');m.classList.remove('bump');void m.offsetWidth;m.classList.add('bump')}
- countTo($('mSp'),tot,v=>eur.format(v));$('mB').textContent=eur0(S.budget);
+ countTo($('mSp'),tot,v=>eur.format(v));$('mB').textContent=inc?`${eur0(S.budget)} + ${eur0(inc)}`:eur0(S.budget);
  ring();
  const rows=ALL.map(c=>({...c,v:month().filter(e=>e.cat==c.id).reduce((a,e)=>a+e.amt,0)})).sort((a,b)=>b.v-a.v);
  $('leg').innerHTML=rows.map(r=>`<li class="${r.v?'':'zero'}"><i style="background:${r.c}"></i><span>${r.n}</span><span>${eur.format(r.v)}</span></li>`).join('');
- const list=month().sort((a,b)=>b.ts-a.ts).slice(0,8);
- $('hist').innerHTML=list.length?list.map(e=>{const c=catOf(e.cat),d=new Date(e.ts);
-  return `<li class="${e.id==o.newId?'new':''}"><div>${e.note?esc(e.note):c.n}<small>${e.fixed?'↻ Dauerbetrag · ':(e.note?c.n+' · ':'')}${d.toLocaleDateString('de-DE',{day:'numeric',month:'short'})}, ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</small></div><span class="a">${eur.format(e.amt)}</span><button class="x" data-id="${e.id}" aria-label="Eintrag löschen">×</button></li>`}).join('')
+ const list=S.entries.filter(inMonth).sort((a,b)=>b.ts-a.ts).slice(0,8);
+ $('hist').innerHTML=list.length?list.map(e=>{const c=isIn(e)?{n:'Einnahme'}:catOf(e.cat),d=new Date(e.ts);
+  return `<li class="${e.id==o.newId?'new':''}${isIn(e)?' inc':''}"><div>${e.note?esc(e.note):c.n}<small>${e.fixed?'↻ Dauerbetrag · ':(e.note?c.n+' · ':'')}${d.toLocaleDateString('de-DE',{day:'numeric',month:'short'})}, ${d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}</small></div><span class="a">${isIn(e)?'+':''}${eur.format(e.amt)}</span><button class="x" data-id="${e.id}" aria-label="Eintrag löschen">×</button></li>`}).join('')
   :'<li class="empty">Noch nichts eingetragen. Tippe auf + oder nutze ein Widget.</li>';
  if(o.newId){const n=$('hist').querySelector('.new .a');if(n)requestAnimationFrame(()=>requestAnimationFrame(()=>n.style.color='inherit'))}
  renderHistory();renderFixed();
